@@ -1,6 +1,6 @@
 # Shortcut Sensei
 
-A web application for learning and mastering keyboard shortcuts across various applications. Features an interactive quiz system, community forum, and comprehensive shortcut database.
+A web application for learning and mastering keyboard shortcuts across various applications. Features an interactive quiz system, and comprehensive shortcut database.
 
 ## Features
 
