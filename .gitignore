@@ -7,7 +7,6 @@ yarn-error.log*
 # Build outputs
 build/
 dist/
-.firebase/
 
 # Environment variables
 .env
@@ -16,10 +15,6 @@ dist/
 .env.test.local
 .env.production.local
 
-# Firebase
-.firebaserc
-firebase-debug.log
-firebase-debug.*.log
 
 # IDE files
 .vscode/
@@ -54,8 +49,6 @@ coverage/
 tmp/
 temp/
 
-# Firebase cache
-.firebase/
 
 # Backup files
 *.backup
@@ -64,8 +57,6 @@ temp/
 # Server logs
 server.log
 
-# Documentation files - exclude all markdown files
-*.md
-*.MD
+# Documentation files - exclude docs folder only
 docs/
-README*
+DEPLOYMENT_GUIDE.md

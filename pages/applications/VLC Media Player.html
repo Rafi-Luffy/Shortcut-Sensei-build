@@ -6,6 +6,13 @@
     <title>VLC Media Player Shortcuts - Shortcut Sensei</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/app-search.css">
+    
+    <!-- MongoDB Authentication -->
+    <script src="../../assets/js/mongodb-auth.js"></script>
+    <script src="../../assets/js/bookmark-handler.js"></script>
+    <script src="../../assets/js/app-search.js"></script>
+    
     <style>
         /* Base styles with CSS variables for easier theming */
         :root {
@@ -185,6 +192,87 @@
         .dark-mode-toggle i {
             font-size: 24px;
             transition: transform 0.4s ease;
+        }
+        
+        /* User Menu Styles */
+        .user-menu-container {
+            position: relative;
+            margin-left: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #9c27b0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            object-fit: cover;
+        }
+        
+        /* Only show purple background when displaying FontAwesome icon */
+        .user-avatar.icon-mode {
+            background-color: #9c27b0;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            border-color: #7b1fa2;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 10px 0;
+            min-width: 200px;
+            margin-top: 10px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-dropdown .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 5px 0;
+        }
+
+        /* Login Button Styles */
+        .login-button-container {
+            position: relative;
+            flex-shrink: 0;
         }
         
         /* Main content */
@@ -902,14 +990,14 @@
 <header>
     <div class="container">
         <div class="logo">
-            <a href="../../home-page.html"><i class="fas fa-keyboard logo-icon"></i> Shortcut Sensei</a>
+            <a href="../../home-page.html">Shortcut Sensei</a>
         </div>
         <nav class="main-nav">
             <ul>
-                <li><a href="../blogs/blogs.html">Blogs</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="../../About.htm">About</a></li>
+                <li><a href="/pages/blogs/blogs.html">Blogs</a></li>
+                <li><a href="/Applications.html">Applications</a></li>
+                <li><a href="/About.html">About</a></li>
+                <li><a href="/quizs/">Quiz</a></li>
             </ul>
             <span class="menu-toggle"><i class="fas fa-bars"></i></span>
         </nav>
@@ -919,6 +1007,23 @@
         </div>
         <div class="dark-mode-toggle">
           <i class="fa-solid fa-moon"></i>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+            <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
+            <div class="user-dropdown" id="userDropdownMenu">
+                <a href="/quizs/?profile=true"><i class="fas fa-user"></i> My Profile</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <!-- Login Button -->
+        <div class="login-button-container" id="loginButtonContainer">
+            <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
         </div>
     </div>
 </header>
@@ -934,15 +1039,12 @@
         </p>
         
         <div class="featured-image-container">
-            <img src="VLC.jpg" alt="VLC Media Player Interface" class="featured-image">
+            <img src="../../images/apps/VLC.jpg" alt="VLC Media Player Interface" class="featured-image">
         </div>
         
         <div class="actions-toolbar">
             <button class="action-button" id="print-btn">
                 <i class="fas fa-print"></i> Print Guide
-            </button>
-            <button class="action-button" id="download-btn">
-                <i class="fas fa-download"></i> Download PDF
             </button>
             <button class="action-button" id="share-btn">
                 <i class="fas fa-share-alt"></i> Share
@@ -967,7 +1069,12 @@
             <button class="category-btn" data-category="navigation">Navigation</button>
             <button class="category-btn" data-category="speed">Playback Speed</button>
             <button class="category-btn" data-category="display">Display Control</button>
-            <button class="category-btn" data-category="subtitle">Subtitle & Audio</button>
+            <button class="category-btn" data-category="subtitle-audio">Subtitle & Audio</button>
+            <button class="category-btn" data-category="aspect-ratio">Aspect Ratios</button>
+            <button class="category-btn" data-category="opening-media">Opening Media</button>
+            <button class="category-btn" data-category="preferences">Preferences</button>
+            <button class="category-btn" data-category="effects">Effects</button>
+            <button class="category-btn" data-category="misc">Miscellaneous</button>
         </div>
     </div>
     
@@ -2290,6 +2397,32 @@
     </footer>
     
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the page - make sure all shortcuts are visible by default
+            const noResults = document.getElementById('no-results');
+            const tables = document.querySelectorAll('table');
+            
+            // Make sure no-results is hidden initially
+            noResults.style.display = 'none';
+            
+            // Make sure all tables are visible initially
+            tables.forEach(table => {
+                const tableContainer = table.closest('.table-container');
+                const sectionTitle = table.previousElementSibling?.previousElementSibling;
+                const sectionDesc = table.previousElementSibling;
+                
+                if (tableContainer) tableContainer.style.display = '';
+                if (sectionTitle) sectionTitle.style.display = '';
+                if (sectionDesc) sectionDesc.style.display = '';
+                
+                // Make sure all rows are visible
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    row.style.display = '';
+                });
+            });
+        });
+        
         // Menu toggle functionality
         const menuToggle = document.querySelector('.menu-toggle');
         const mainNav = document.querySelector('.main-nav ul');
@@ -2474,6 +2607,13 @@
         });
     </script>
     
-    </body>
+        <script src="../../assets/js/unified-system.js"></script>
+        
+        <!-- Global Managers for User Profile, Bookmarks, and Dark Mode -->
+        <script src="../../assets/js/global-user-manager.js"></script>
+        <script src="../../assets/js/bookmark-manager.js"></script>
+        <script src="../../assets/js/dark-mode-manager.js"></script>
+        <script src="../../assets/js/footer-manager.js"></script>
+</body>
     </html>
     

@@ -6,21 +6,67 @@
     <title>Slack Shortcuts - Shortcut Sensei</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/global.css">
+    
+    <!-- MongoDB Authentication -->
+    <script src="../../assets/js/mongodb-auth.js"></script>
     <style>
-        /* Base styles */
-        body {
-            font-family: Arial, sans-serif;
+        /* Base styles with CSS variables for easier theming */
+        :root {
+            --primary-color: #06a3be;
+            --primary-hover: #048ea6;
+            --secondary-color: #8a2be2;
+            --secondary-hover: #7a1dc5;
+            --dark-bg: #121212;
+            --dark-card: #1e1e1e;
+            --dark-text: #f4f4f4;
+            --light-bg: #f4f4f4;
+            --light-card: #ffffff;
+            --light-text: #333;
+            --header-footer-bg: #000000;
+            --selection-color: rgba(6, 163, 190, 0.2);
+            --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --shadow-dark: 0 4px 8px rgba(0, 0, 0, 0.3);
+            --border-radius: 8px;
+            --transition-speed: 0.3s;
+        }
+        
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
         }
-
-        /* Header styles */
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+        
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+        
+        ::selection {
+            background-color: var(--selection-color);
+        }
+        
+        /* Header styles - sticky with shadow */
         header {
-            background-color: #333;
+            background-color: var(--header-footer-bg);
             color: #fff;
-            padding: 10px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .container {
@@ -36,6 +82,8 @@
             text-decoration: none;
             font-size: 1.8em;
             font-weight: bold;
+            display: flex;
+            align-items: center;
         }
 
         .main-nav ul {
@@ -46,20 +94,21 @@
             gap: 20px;
         }
 
-        .main-nav ul li {
-            position: relative;
-        }
-
         .main-nav ul li a {
             color: #fff;
             text-decoration: none;
             padding: 10px 15px;
             display: block;
+            transition: all var(--transition-speed) ease;
+            border-radius: var(--border-radius);
         }
 
         .main-nav ul li a:hover {
             background-color: #444;
-            border-radius: 4px;
+        }
+        
+        .main-nav ul li a.active {
+            background-color: var(--primary-color);
         }
 
         .menu-toggle {
@@ -70,217 +119,670 @@
         }
 
         .search-container {
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             background-color: #fff;
             border-radius: 25px;
             padding: 5px 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-light);
+            position: relative;
+            transition: all var(--transition-speed);
+        }
+        
+        .dark-mode .search-container {
+            background-color: #333;
+            box-shadow: var(--shadow-dark);
         }
 
         .search-container input[type="text"] {
+            flex: 1;
             padding: 8px;
             border: none;
             border-radius: 20px;
             margin-right: 10px;
-            width: 300px;
             font-size: 16px;
             outline: none;
+            background-color: transparent;
+            color: var(--light-text);
+            transition: color var(--transition-speed);
+        }
+        
+        .dark-mode .search-container input[type="text"] {
+            color: var(--dark-text);
+        }
+        
+        .search-container input[type="text"]::placeholder {
+            color: #888;
         }
 
         .search-container button {
             padding: 8px 15px;
             border: none;
             border-radius: 20px;
-            background-color: purple;
+            background-color: var(--secondary-color);
             color: #fff;
             cursor: pointer;
             font-size: 16px;
             outline: none;
-            transition: background-color 0.3s;
+            transition: background-color var(--transition-speed);
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
         }
-
+        
         .search-container button:hover {
-            background-color: #6a1b9a;
+            background-color: var(--secondary-hover);
+        }
+        
+        .dark-mode-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-left: 15px;
+            position: relative;
+            user-select: none;
+        }
+        
+        .dark-mode-toggle i {
+            font-size: 24px;
+            transition: transform 0.4s ease;
+        }
+        
+        /* User Menu Styles */
+        .user-menu-container {
+            position: relative;
+            margin-left: 15px;
         }
 
-        .search-container button i {
-            color: #fff;
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #9c27b0;
+            transition: all 0.3s ease;
+            object-fit: cover;
         }
 
-         /* Responsive styles */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .main-nav ul {
-                flex-direction: column;
-                gap: 10px;
-                width: 100%;
-                display: none;
-            }
-
-            .main-nav ul.show {
-                display: flex;
-            }
-
-            .search-container, .menu-toggle {
-                margin-top: 10px;
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .search-container input[type="text"] {
-                width: 100%;
-            }
-
-            .features .feature, .latest-news article {
-                width: 100%;
-                margin: 10px 0;
-            }
+        .user-avatar:hover {
+            transform: scale(1.05);
+            border-color: #7b1fa2;
         }
 
-        /* Search table styles */
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 10px 0;
+            min-width: 200px;
+            margin-top: 10px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-dropdown .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 5px 0;
+        }
+
+        /* Login Button Styles */
+        .login-button-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #7b1fa2, #4a148c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn i {
+            font-size: 16px;
+        }
+        
+        /* Main content */
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .intro-container {
+            background-color: var(--light-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-light);
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        
+        .dark-mode .intro-container {
+            background-color: var(--dark-card);
+            box-shadow: var(--shadow-dark);
+        }
+        
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .featured-image-container {
+            position: relative;
+            width: 100%;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .featured-image {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .dark-mode .featured-image {
+            box-shadow: var(--shadow-dark);
+        }
+        
+        .featured-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .section-title:hover::after {
+            width: 100px;
+        }
+        
+        .section-description {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Actions toolbar */
+        .actions-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform 0.2s;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .action-button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .action-button i {
+            margin-right: 8px;
+        }
+        
+        /* Filter section with improved styling */
+        .filter-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--light-card);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-light);
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        
+        .dark-mode .filter-section {
+            background-color: var(--dark-card);
+            box-shadow: var(--shadow-dark);
+        }
+        
+        .filter-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .filter-container {
+            margin-bottom: 1rem;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color var(--transition-speed), background-color var(--transition-speed);
+            outline: none;
+        }
+        
+        .filter-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(6, 163, 190, 0.2);
+        }
+        
+        .dark-mode .filter-input {
+            background-color: #333;
+            border-color: #555;
+            color: var(--dark-text);
+        }
+        
+        /* Category filter */
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .category-btn {
+            background-color: #eee;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+        
+        .dark-mode .category-btn {
+            background-color: #333;
+            color: var(--dark-text);
+        }
+        
+        .category-btn:hover {
+            background-color: #ddd;
+            transform: translateY(-2px);
+        }
+        
+        .dark-mode .category-btn:hover {
+            background-color: #444;
+        }
+        
+        .category-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Empty state message */
+        .empty-state {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background-color: var(--light-card);
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .dark-mode .empty-state {
+            background-color: var(--dark-card);
+            box-shadow: var(--shadow-dark);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+        
+        /* Table styles with enhanced design */
+        .table-container {
+            background-color: var(--light-card);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-light);
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+            overflow: hidden;
+        }
+        
+        .dark-mode .table-container {
+            background-color: var(--dark-card);
+            box-shadow: var(--shadow-dark);
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px auto;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 15px;
-            background-color: #fff;
-            overflow: hidden; /* Ensures that curved corners are applied */
+            margin: 1rem 0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
         }
-
-        th, td {
-            border: 1px solid #dddddd;
-            padding: 8px;
-            text-align: left;
-        }
-
+        
         th {
-            background-color: #f2f2f2;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            position: sticky;
+            top: 0;
         }
-
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color var(--transition-speed);
+        }
+        
+        .dark-mode td {
+            border-bottom: 1px solid #444;
+        }
+        
+        tbody tr {
+            transition: background-color var(--transition-speed);
+        }
+        
         tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: rgba(0, 0, 0, 0.02);
         }
-
+        
+        .dark-mode tbody tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        
         tbody tr:hover {
-            background-color: #f1f1f1;
+            background-color: rgba(6, 163, 190, 0.08);
         }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
+        
+        /* Copy button for shortcuts */
+        .actions-cell {
+            white-space: nowrap;
         }
-
-        h1 {
-            text-align: center;
-            color: #333;
+        
+        .copy-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed);
         }
-
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
+        
+        .copy-btn:hover {
+            color: var(--secondary-color);
+            background-color: rgba(0, 0, 0, 0.05);
         }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #dddddd;
+        
+        .dark-mode .copy-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
-
-        th {
-            background-color: #2cba19;
-            color: #333;
+        
+        /* Tooltip for copied message */
+        .tooltip {
+            position: relative;
+            display: inline-block;
         }
-
-        tbody tr:hover {
-            background-color: #f9f9f9;
-        }
-        .indented-paragraph {
-        margin-left: 11.5%; /* Adjust the value 165px as needed */
-        margin-right: 4.4%;  /*440 px */
-    }
-    .my-custom-class {
-            display: flex; /* Use flexbox for layout */
-            align-items: center; /* Vertically center items */
-        }
-       .image{
-        width: 1000px;
-        height: 500px;
-        margin-left: 165px;
-
-       }
-
-        /* Footer styles */
-        footer {
-            background-color: #333;
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 80px;
+            background-color: rgba(0, 0, 0, 0.7);
             color: #fff;
-            padding: 20px 0;
             text-align: center;
+            border-radius: 4px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -40px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(10px);
+            font-size: 0.8rem;
+        }
+        
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
+        }
+        
+        .tooltip .tooltiptext.visible {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Key combination styling */
+        .key-combo {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .key {
+            display: inline-block;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+            box-shadow: 0 2px 0 #ccc;
+            transition: all var(--transition-speed);
+        }
+        
+        /* Arrow keys special styling */
+        .key.arrow-key {
+            background-color: #e8f4f8;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .dark-mode .key {
+            background-color: #333;
+            border-color: #555;
+            box-shadow: 0 2px 0 #222;
+        }
+        
+        .dark-mode .key.arrow-key {
+            background-color: #1a2332;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* Footer styles with enhanced design */
+        footer {
+            background-color: var(--header-footer-bg);
+            color: #fff;
+            padding: 40px 0 20px;
+            margin-top: 2rem;
         }
 
         .footer-content {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--primary-color);
         }
 
-        .footer-links {
+        .footer-links, .social-icons {
             list-style-type: none;
             margin: 0;
             padding: 0;
-            display: flex;
-            gap: 20px;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
         }
 
-        .footer-links li a {
-            color: #fff;
+        .footer-links li a, .social-icons li a {
+            color: #ccc;
             text-decoration: none;
-            font-size: 1em;
+            transition: all var(--transition-speed);
+            display: inline-block;
         }
 
         .footer-links li a:hover {
-            text-decoration: underline;
+            color: #fff;
+            transform: translateX(5px);
         }
-
+        
         .social-icons {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
             display: flex;
-            gap: 20px;
-        }
-
-        .social-icons li {
-            display: inline;
+            gap: 15px;
         }
 
         .social-icons li a {
-            color: #fff;
             font-size: 1.5em;
-            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all var(--transition-speed);
         }
 
         .social-icons li a:hover {
-            color: #6a1b9a;
+            color: #fff;
+            background-color: var(--primary-color);
+            transform: translateY(-5px);
         }
 
         .subscribe-form {
             display: flex;
             gap: 10px;
+            max-width: 400px;
+            width: 100%;
         }
 
         .subscribe-form input[type="email"] {
-            padding: 10px;
+            flex: 1;
+            padding: 12px 15px;
             border: none;
             border-radius: 20px;
             outline: none;
@@ -288,806 +790,1644 @@
         }
 
         .subscribe-form button {
-            padding: 10px 20px;
+            padding: 12px 20px;
             border: none;
             border-radius: 20px;
-            background-color: purple;
+            background-color: var(--secondary-color);
             color: #fff;
             cursor: pointer;
             font-size: 1em;
-            transition: background-color 0.3s;
+            transition: background-color var(--transition-speed);
+            white-space: nowrap;
         }
 
         .subscribe-form button:hover {
-            background-color: #6a1b9a;
+            background-color: var(--secondary-hover);
         }
 
-        footer p {
-            margin: 20px 0 0;
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-
-            /* for ordered list of items*/
-
-            ol {
-
-        margin-left: 11.5%; /* Adjust the value 165px as needed */
-        margin-right: 4.4%;  /*440 px */
-
-        }
-
-        ol li {
-        margin-bottom: 1%; /* Margin between list items */
-        }
-
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .main-nav ul {
+        
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .footer-content {
                 flex-direction: column;
+                gap: 30px;
+            }
+            
+            .footer-column {
+                min-width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .main-nav ul {
                 display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background-color: var(--header-footer-bg);
+                width: 100%;
+                z-index: 10;
+                flex-direction: column;
+                gap: 0;
+                padding: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             }
 
             .main-nav ul.show {
                 display: flex;
             }
-
-            .menu-toggle {
-                display: block;
+            
+            .search-container {
+                margin-right: 10px;
             }
-
-            .features .feature,
-            .latest-news article {
-                width: 100%;
-                margin: 10px 0;
-            }
-
+            
             .search-container input[type="text"] {
-                width: 200px;
+                width: 120px;
+            }
+            
+            .search-container button {
+                padding: 8px 12px;
+            }
+            
+            .category-filter {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+            }
+            
+            .category-btn {
+                scroll-snap-align: start;
+                flex: 0 0 auto;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+            
+            .table-container {
+                padding: 10px;
+                overflow-x: auto;
             }
         }
+        
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+            }
+            
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .logo a {
+                font-size: 1.5em;
+            }
+            
+            .dark-mode-toggle i {
+                font-size: 20px;
+            }
+            
+            .search-container {
+                display: none;
+            }
+            
+            .actions-toolbar {
+                flex-direction: column;
+            }
+            
+            .action-button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .key-combo {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        
+        /* Back to top button */
+        .back-to-top {
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            background-color: #06a3be !important;
+            color: white !important;
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            cursor: pointer !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transition: opacity 0.3s, visibility 0.3s, background-color 0.3s, transform 0.2s !important;
+            z-index: 9999 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+            border: none !important;
+        }
+        
+        .back-to-top:hover {
+            background-color: #048ea6 !important;
+            transform: translateY(-5px) !important;
+        }
+        
+        .back-to-top:hover {
+            background-color: #048ea6 !important;
+            transform: translateY(-5px) !important;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .back-to-top:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-5px);
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
-    <script src="assets/js/global.js"></script>
+    <script src="../../assets/js/global.js"></script>
 </head>
 <body>
+<a id="top"></a>
 <header>
     <div class="container">
         <div class="logo">
-            <a href="../../home-page.html"><i class="fas fa-keyboard logo-icon"></i> Shortcut Sensei</a>
+            <a href="../../home-page.html">Shortcut Sensei</a>
         </div>
         <nav class="main-nav">
             <ul>
-                <li><a href="../blogs/blogs.html">Blogs</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="../../About.htm">About</a></li>
+                <li><a href="/pages/blogs/blogs.html">Blogs</a></li>
+                <li><a href="/Applications.html">Applications</a></li>
+                <li><a href="/About.html">About</a></li>
+                <li><a href="/quizs/">Quiz</a></li>
             </ul>
             <span class="menu-toggle"><i class="fas fa-bars"></i></span>
         </nav>
         <div class="search-container">
-            <input type="text" placeholder="Search...">
+            <input type="text" placeholder="Search applications..." id="app">
             <button type="button"><i class="fas fa-search"></i></button>
+            <div id="appResults" class="app-search-results"></div>
         </div>
         <div class="dark-mode-toggle">
           <i class="fa-solid fa-moon"></i>
         </div>
+        
+        <!-- User Menu -->
+        <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+            <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 32px; color: #8B5FBF; cursor: pointer;"></i>
+            <div class="user-dropdown" id="userDropdownMenu">
+                <a href="../user/user_profile.html"><i class="fas fa-user"></i> My Profile</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <!-- Login Button for non-authenticated users -->
+        <div class="login-button-container" id="loginButtonContainer">
+            <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </div>
     </div>
 </header>
-    <br>
-    <h1 style="text-align: left; margin-left: 10.5%;font-size: 40px;">Top 79 Shortcuts for Slack</h1>
 
-    <p class="indented-paragraph">
-
-        <b>Welcome to Shortcut Sensei!</b> <br>
-
-            Are you a frequent Slack user looking to optimize your productivity? You've come to the right place! Slack is packed with shortcuts that can help you navigate channels, manage messages, and collaborate with ease.<br>
-
-    </p>
-
-    <div class="my-custom-class">
-        <img src="Slack.png" alt="Slack" class="image">
-    </div>    
-
-    <br>
-
-<p class="indented-paragraph" style="line-height: 26px;"> <b>Discover the Possibilities</b><br>
-
-    In this guide, we've compiled the top 75 Slack shortcuts, sorted into categories for easy reference. Whether you're sending messages, managing notifications, or customizing your workspace, these shortcuts will supercharge your Slack experience. Let's dive in and explore how these shortcuts can revolutionize the way you work in Slack!
-
-
-    </p>
-      <br>
-
-  <h2 style="text-align: left; margin-left: 10.5%;">General Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Master the basics of Slack with these essential shortcuts for navigation, communication, and workspace management.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + K</td>
-                <td>Open direct messages</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + L</td>
-                <td>Open channels list</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + T</td>
-                <td>Create a new channel</td>
-            </tr>
-            <tr>
-                <td>Ctrl + , (Comma)</td>
-                <td>Open preferences</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Q</td>
-                <td>Quit Slack</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Period (.)</td>
-                <td>Open the keyboard shortcuts list</td>
-            </tr>
-        </tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Navigation Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Effortlessly move through Slack with these shortcuts, helping you quickly access channels, direct messages, and other key areas.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + K</td>
-                <td>Open the Quick Switcher</td>
-            </tr>
-            <tr>
-                <td>Ctrl + 1 to 9</td>
-                <td>Switch to a specific workspace (based on the order in the sidebar)</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Tab</td>
-                <td>Move to the next section/detail pane</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + Tab</td>
-                <td>Move to the previous section/detail pane</td>
-            </tr>
-            <tr>
-                <td>Ctrl + ]</td>
-                <td>Move to the next channel or DM</td>
-            </tr>
-            <tr>
-                <td>Ctrl + [</td>
-                <td>Move to the previous channel or DM</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + J</td>
-                <td>Move to next section in the sidebar</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + K</td>
-                <td>Move to previous section in the sidebar</td>
-            </tr>
-            <tr>
-                <td>Ctrl + ` (Grave accent)</td>
-                <td>Toggle between your direct messages and channels</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + U</td>
-                <td>Jump to unread messages</td>
-            </tr>
-            <tr>
-                <td>Page Up</td>
-                <td>Scroll up in the current channel/views</td>
-            </tr>
-            <tr>
-                <td>Page Down</td>
-                <td>Scroll down in the current channel/views</td>
-            </tr>
-            <tr>
-                <td>Home</td>
-                <td>Jump to the beginning of the conversation</td>
-            </tr>
-            <tr>
-                <td>End</td>
-                <td>Jump to the most recent message</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Messaging Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-   Enhance your communication with these shortcuts for composing, editing, and managing your messages in Slack.
-</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Enter</td>
-                <td>Send a message</td>
-            </tr>
-            <tr>
-                <td>Shift + Enter</td>
-                <td>Start a new line in the message</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + * (Asterisk)</td>
-                <td>Insert a line break without sending the message (similar to Shift + Enter)</td>
-            </tr>
-            <tr>
-                <td>Ctrl + B</td>
-                <td>Bold selected text</td>
-            </tr>
-            <tr>
-                <td>Ctrl + I</td>
-                <td>Italicize selected text</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + X</td>
-                <td>Strikethrough selected text</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + 7</td>
-                <td>Format selected text as a numbered list</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + 8</td>
-                <td>Format selected text as a bulleted list</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + > (Greater Than)</td>
-                <td>Quote selected text</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + B</td>
-                <td>Format selected text as code block</td>
-            </tr>
-            <tr>
-                <td>Ctrl + L</td>
-                <td>Hyperlink selected text</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + M</td>
-                <td>Open the Mention window</td>
-            </tr>
-</tbody>
-  </table>
-
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Search and Filters Shortcuts</h2>
-
-  <p class="indented-paragraph">
-    Quickly find messages, files, and more using these shortcuts for efficient searching and filtering in Slack.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + F</td>
-                <td>Open the search bar for current conversation</td>
-            </tr>
-            <tr>
-                <td>Ctrl + G</td>
-                <td>Open the search bar to search across all conversations</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + F</td>
-                <td>Open the search bar and pre-select Messages tab</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + G</td>
-                <td>Open the search bar and pre-select Files tab</td>
-            </tr>
-</tbody>
-  </table>
-
-
- <h2 style="text-align: left; margin-left: 10.5%;">Channels and Mentions Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Manage your channels and stay on top of mentions with these handy shortcuts for better team communication.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + M</td>
-                <td>View recent mentions</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + A</td>
-                <td>View the Activity pane</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + S</td>
-                <td>Deactivate notifications for a channel or direct message</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Files and Attachments Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Streamline file management with these shortcuts for uploading, accessing, and organizing files and attachments in Slack.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + Y</td>
-                <td>Open the files pane</td>
-            </tr>
-            <tr>
-                <td>Ctrl + U</td>
-                <td>Upload a file</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Calls and Video Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-Efficiently manage your audio and video calls with these shortcuts, making it easy to connect and communicate in Slack.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + H</td>
-                <td>Start a call</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + H again</td>
-                <td>End the call</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + A</td>
-                <td>Toggle the video on/off</td>
-            </tr>
-            <tr>
-                <td>Ctrl + M</td>
-                <td>Mute/unmute the microphone</td>
-            </tr>
-</tbody>
-  </table>
-  
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Emojis and Reactions Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Express yourself quickly with these shortcuts for adding emojis and reactions to messages in Slack.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + * (Asterisk)</td>
-                <td>Open the emoji menu</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + E</td>
-                <td>Add a reaction to the last message</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Interface Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Navigate and customize the Slack interface effortlessly with these essential shortcuts.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-
-            <tr>
-                <td>Ctrl + = (Equal)</td>
-                <td>Zoom In</td>
-            </tr>
-            <tr>
-                <td>Ctrl + - (Minus)</td>
-                <td>Zoom Out</td>
-            </tr>
-            <tr>
-                <td>Ctrl + 0</td>
-                <td>Reset Zoom</td>
-            </tr>
-            <tr>
-                <td>Ctrl + \ (Backslash)</td>
-                <td>Toggle sidebar visibility</td>
-            </tr>
-            <tr>
-                <td>F11</td>
-                <td>Toggle full-screen mode</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  
-  <h2 style="text-align: left; margin-left: 10.5%;">Direct Messages Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-   Stay on top of your direct message conversations with these shortcuts for efficient communication in Slack.</p>
-
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + D</td>
-                <td>Open direct messages with a specific user</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + Up Arrow</td>
-                <td>Go to newer messages in direct messages</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + Down Arrow</td>
-                <td>Go to older messages in direct messages</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Threads Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Manage and participate in message threads with ease using these shortcuts for threaded conversations in Slack.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + T</td>
-                <td>Open threads view</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + . (Period)</td>
-                <td>Jump to most recent thread</td>
-            </tr>
-</tbody>
-  </table>
-  
-  
-  <h2 style="text-align: left; margin-left: 10.5%;">Notifications Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Take control of your Slack notifications with these shortcuts for managing alerts and staying informed.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + M</td>
-                <td>Open the Mentions & Reactions pane</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + N</td>
-                <td>Next unread channel or direct message</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + K</td>
-                <td>Open All Unreads</td>
-            </tr>
-</tbody>
-  </table>
-
-
- <h2 style="text-align: left; margin-left: 10.5%;">Administration Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Streamline administrative tasks and manage your Slack workspace efficiently with these shortcuts.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + C</td>
-                <td>View channel details</td>
-            </tr>
-            <tr>
-                <td>Ctrl + / (Forward Slash)</td>
-                <td>Open the Commands list</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + A</td>
-                <td>Open the Accessibility settings</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Y</td>
-                <td>Set or clear your status</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + I</td>
-                <td>Open developer tools</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + F</td>
-                <td>Format code (pre-set formatting)</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Keyboard Focus Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Quickly navigate and interact with Slack using these shortcuts for keyboard-focused actions.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Esc</td>
-                <td>Remove focus from the text input</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + 1</td>
-                <td>Focus on the first workspace</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + 2</td>
-                <td>Focus on the second workspace, and so on</td>
-            </tr>
-            <tr>
-                <td>Alt + Shift + Up Arrow</td>
-                <td>Move focus up in the sidebar</td>
-            </tr>
-            <tr>
-                <td>Alt + Shift + Down Arrow</td>
-                <td>Move focus down in the sidebar</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  
-  <h2 style="text-align: left; margin-left: 10.5%;">Common Actions Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Perform common actions swiftly with these shortcuts, enhancing your productivity in Slack.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Ctrl + Shift + P</td>
-                <td>Create a new workspace</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + R</td>
-                <td>Reload Slack</td>
-            </tr>
-            <tr>
-                <td>Alt + Shift + 0-9</td>
-                <td>Navigate through your organization's different workspaces</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + C</td>
-                <td>Mark all messages as read</td>
-            </tr>
-</tbody>
-  </table>
-
-
-  <h2 style="text-align: left; margin-left: 10.5%;">Miscellaneous Shortcuts</h2>
-
-  <p class="indented-paragraph">
-
-    Explore a variety of handy shortcuts for miscellaneous tasks in Slack, improving your overall user experience.</p>
-
-  <table>
-    <thead>
-        <tr>
-            <th style="color: #fff;">Key Combination</th>
-            <th style="color: #fff;">Description</th>
-        </tr>
-    </thead>
-<tbody>
-            <tr>
-                <td>Alt + Left Arrow</td>
-                <td>Go back to previous view</td>
-            </tr>
-            <tr>
-                <td>Alt + Right Arrow</td>
-                <td>Go forward to next view</td>
-            </tr>
-            <tr>
-                <td>Ctrl + E</td>
-                <td>Go to recent conversations</td>
-            </tr>
-            <tr>
-                <td>Ctrl + Shift + / (Forward Slash)</td>
-                <td>Open search for shortcuts and commands</td>
-            </tr>
-        </tbody>
-</table>                
-
- 
-        <hr> <br>
+<div class="content-wrapper">
+    <h1 class="page-title">Top 78 Slack Shortcuts</h1>
     
-    
-        <p class="indented-paragraph" style="line-height: 25px">
-    
-          <b>Become a Slack Shortcut Ninja</b><br>   
-    
-    Congratulations on exploring the top 79 Slack shortcuts! By now, you should feel more confident in your ability to navigate and utilize Slack more efficiently. These shortcuts are designed to streamline your workflow and save you valuable time.
-    <br>
-    
-          <b>Tips for Mastering These Shortcuts:</b>
+    <div class="intro-container">
+        <p class="intro-text">
+            Master these essential keyboard shortcuts to navigate and communicate in Slack efficiently. Whether you're chatting with colleagues, managing channels, or participating in video calls, these shortcuts will help you work faster and more productively.
         </p>
-    <p class="indented-paragraph">
-    
-    
-             <ol>     
-              
-                  <li><b>Practice Regularly:</b>Integrate these shortcuts into your daily Slack use to reinforce your learning.</li>
-                <li><b>Customize Your Workflow:</b>Adjust Slack settings to better integrate these shortcuts into your routine.</li>
-                <li><b>Share with Others:</b> Help friends and colleagues enhance their Slack experience by sharing these shortcuts.</li>
-    
-             </ol> 
-    </p>
-    
-    <p class="indented-paragraph" style="line-height: 24px;">
-                  <b>We Value Your Feedback:</b> <br>
-    
-                  Your input is important to us! If you have suggestions for additional shortcuts or other applications you'd like us to cover, please don't hesitate to reach out.
-                  <br>
-    
-                 <br>
-                  <b>Thank you</b>
-                  
-                        for using Shortcut Sensei. We hope these shortcuts empower you to navigate Slack with confidence and efficiency. Happy shortcutting!
         
+        <div class="featured-image-container">
+            <img src="../../images/apps/Slack.png" alt="Slack Interface" class="featured-image">
+        </div>
+        
+        <div class="actions-toolbar">
+            <button class="action-button" id="print-btn" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Guide
+            </button>
+            <button class="action-button" id="download-btn" onclick="downloadPDF()">
+                <i class="fas fa-download"></i> Download PDF
+            </button>
+            <button class="action-button" id="share-btn" onclick="shareContent()">
+                <i class="fas fa-share-alt"></i> Share
+            </button>
+            <button class="action-button" id="bookmark-btn" onclick="bookmarkPage()">
+                <i class="fas fa-bookmark"></i> Bookmark
+            </button>
+        </div>
+    </div>
+    
+    <div class="filter-section">
+        <div class="filter-container">
+            <div class="filter-title">Search Shortcuts</div>
+            <input type="text" id="shortcut-filter" class="filter-input" placeholder="Type to search for shortcuts..." onkeyup="filterShortcuts()">
+        </div>
+        
+        <div class="filter-title">Filter by Category</div>
+        <div class="category-filter">
+            <button class="category-btn active" data-category="all" onclick="filterByCategory('all')">All Shortcuts</button>
+            <button class="category-btn" data-category="general" onclick="filterByCategory('general')">General</button>
+            <button class="category-btn" data-category="navigation" onclick="filterByCategory('navigation')">Navigation</button>
+            <button class="category-btn" data-category="messaging" onclick="filterByCategory('messaging')">Messaging</button>
+        </div>
+    </div>
+    
+    <div class="empty-state" id="no-results">
+        <i class="fas fa-search"></i>
+        <h3>No shortcuts found</h3>
+        <p>Try adjusting your search or filter criteria.</p>
+    </div>
+
+    <div class="table-container" data-category="general">
+        <h2 class="section-title" id="general-shortcuts">General Shortcuts</h2>
+        <p class="section-description">
+            Essential shortcuts to quickly access Slack's basic functions and features.
         </p>
-      <br>    
 
+        <table id="general-table">
+            <thead>
+                <tr>
+                    <th width="30%">Key Combination</th>
+                    <th>Description</th>
+                    <th width="10%">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">K</span>
+                        </div>
+                    </td>
+                    <td>Open direct messages</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + K" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">L</span>
+                        </div>
+                    </td>
+                    <td>Open channels list</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + L" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">T</span>
+                        </div>
+                    </td>
+                    <td>Create a new channel</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + T" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">,</span>
+                        </div>
+                    </td>
+                    <td>Open preferences</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + ," onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Q</span>
+                        </div>
+                    </td>
+                    <td>Quit Slack</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Q" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">.</span>
+                        </div>
+                    </td>
+                    <td>Open the keyboard shortcuts list</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + ." onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">F</span>
+                        </div>
+                    </td>
+                    <td>Search within current conversation</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + F" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">G</span>
+                        </div>
+                    </td>
+                    <td>Search previous message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + G" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">G</span>
+                        </div>
+                    </td>
+                    <td>Search next message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + G" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">F6</span>
+                        </div>
+                    </td>
+                    <td>Move focus to the next section</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="F6" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Shift</span> + <span class="key">F6</span>
+                        </div>
+                    </td>
+                    <td>Move focus to the previous section</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Shift + F6" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">A</span>
+                        </div>
+                    </td>
+                    <td>Open the All Unreads view</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + A" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">M</span>
+                        </div>
+                    </td>
+                    <td>Open the Mentions & Reactions view</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + M" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">Y</span>
+                        </div>
+                    </td>
+                    <td>Set status</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + Y" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">U</span>
+                        </div>
+                    </td>
+                    <td>Upload a file</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + U" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">E</span>
+                        </div>
+                    </td>
+                    <td>Create a snippet</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + E" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Plus</span>
+                        </div>
+                    </td>
+                    <td>Increase font size</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Plus" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Minus</span>
+                        </div>
+                    </td>
+                    <td>Decrease font size</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Minus" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">0</span>
+                        </div>
+                    </td>
+                    <td>Reset zoom level</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + 0" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">I</span>
+                        </div>
+                    </td>
+                    <td>Open Developer Tools</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + I" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">F11</span>
+                        </div>
+                    </td>
+                    <td>Toggle full screen</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="F11" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">D</span>
+                        </div>
+                    </td>
+                    <td>Toggle do not disturb</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + D" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">R</span>
+                        </div>
+                    </td>
+                    <td>Refresh/reload Slack</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + R" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">R</span>
+                        </div>
+                    </td>
+                    <td>Hard refresh (clear cache)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + R" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">W</span>
+                        </div>
+                    </td>
+                    <td>Close current window</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + W" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-column">
-                <h3>About Shortcut Sensei</h3>
-                <p>Your ultimate guide to mastering keyboard shortcuts. We provide comprehensive guides and tips to help you work faster and more efficiently.</p>
-            </div>
-            <div class="footer-column">
-                <h3>Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="../../home-page.html">Home</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                    <li><a href="../../About.htm">About</a></li>
-                    <li><a href="Privacy.html">Privacy Policy</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>Follow Us</h3>
-                <ul class="social-icons">
-                    <li><a href="#"><i class="fab fa-facebook"></i></a></li>
-                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                    <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
-                    <li><a href="#"><i class="fab fa-instagram"></i></a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>Subscribe</h3>
-                <form class="subscribe-form">
-                    <input type="email" placeholder="Your email" required>
-                    <button type="submit">Subscribe</button>
-                </form>
-            </div>
+    <div class="table-container" data-category="navigation">
+        <h2 class="section-title" id="navigation-shortcuts">Navigation Shortcuts</h2>
+        <p class="section-description">
+            Effortlessly move through Slack with these shortcuts, helping you quickly access channels, direct messages, and other key areas.
+        </p>
+
+        <table id="navigation-table">
+            <thead>
+                <tr>
+                    <th width="30%">Key Combination</th>
+                    <th>Description</th>
+                    <th width="10%">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">K</span>
+                        </div>
+                    </td>
+                    <td>Open the Quick Switcher</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + K" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">1-9</span>
+                        </div>
+                    </td>
+                    <td>Switch to a specific workspace (based on the order in the sidebar)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + 1-9" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Tab</span>
+                        </div>
+                    </td>
+                    <td>Move to the next section/detail pane</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Tab" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">Tab</span>
+                        </div>
+                    </td>
+                    <td>Move to the previous section/detail pane</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + Tab" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">]</span>
+                        </div>
+                    </td>
+                    <td>Move to the next channel or DM</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + ]" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">[</span>
+                        </div>
+                    </td>
+                    <td>Move to the previous channel or DM</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + [" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Alt</span> + <span class="key">↑</span>
+                        </div>
+                    </td>
+                    <td>Move up in channel list</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Alt + ↑" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Alt</span> + <span class="key">↓</span>
+                        </div>
+                    </td>
+                    <td>Move down in channel list</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Alt + ↓" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Alt</span> + <span class="key">Shift</span> + <span class="key">↑</span>
+                        </div>
+                    </td>
+                    <td>Move to previous unread channel</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Alt + Shift + ↑" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Alt</span> + <span class="key">Shift</span> + <span class="key">↓</span>
+                        </div>
+                    </td>
+                    <td>Move to next unread channel</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Alt + Shift + ↓" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Page Up</span>
+                        </div>
+                    </td>
+                    <td>Scroll up in message history</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Page Up" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Page Down</span>
+                        </div>
+                    </td>
+                    <td>Scroll down in message history</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Page Down" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Home</span>
+                        </div>
+                    </td>
+                    <td>Jump to first message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Home" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">End</span>
+                        </div>
+                    </td>
+                    <td>Jump to most recent message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="End" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Shift</span> + <span class="key">Esc</span>
+                        </div>
+                    </td>
+                    <td>Mark channel as read</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Shift + Esc" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Esc</span>
+                        </div>
+                    </td>
+                    <td>Close current dialog or return to main view</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Esc" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">J</span>
+                        </div>
+                    </td>
+                    <td>Jump to conversation</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + J" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">↑</span>
+                        </div>
+                    </td>
+                    <td>Move up in channel list when sidebar focused</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="↑" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">↓</span>
+                        </div>
+                    </td>
+                    <td>Move down in channel list when sidebar focused</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="↓" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Enter</span>
+                        </div>
+                    </td>
+                    <td>Select highlighted channel or option</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Enter" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-container" data-category="messaging">
+        <h2 class="section-title" id="messaging-shortcuts">Messaging Shortcuts</h2>
+        <p class="section-description">
+            Enhance your communication with these shortcuts for composing, editing, and managing your messages in Slack.
+        </p>
+
+        <table id="messaging-table">
+            <thead>
+                <tr>
+                    <th width="30%">Key Combination</th>
+                    <th>Description</th>
+                    <th width="10%">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Enter</span>
+                        </div>
+                    </td>
+                    <td>Send a message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Enter" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Shift</span> + <span class="key">Enter</span>
+                        </div>
+                    </td>
+                    <td>Start a new line in the message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Shift + Enter" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">B</span>
+                        </div>
+                    </td>
+                    <td>Bold text</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + B" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">I</span>
+                        </div>
+                    </td>
+                    <td>Italic text</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + I" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">S</span>
+                        </div>
+                    </td>
+                    <td>Strikethrough text</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + S" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">F</span>
+                        </div>
+                    </td>
+                    <td>Format text as code block</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + F" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">C</span>
+                        </div>
+                    </td>
+                    <td>Format text as inline code</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + C" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">Q</span>
+                        </div>
+                    </td>
+                    <td>Create a quote</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + Q" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">7</span>
+                        </div>
+                    </td>
+                    <td>Create a numbered list</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + 7" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">8</span>
+                        </div>
+                    </td>
+                    <td>Create a bulleted list</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + 8" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Z</span>
+                        </div>
+                    </td>
+                    <td>Undo typing</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Z" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Y</span>
+                        </div>
+                    </td>
+                    <td>Redo typing</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Y" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">↑</span>
+                        </div>
+                    </td>
+                    <td>Edit your last message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="↑" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Tab</span>
+                        </div>
+                    </td>
+                    <td>Repost the last slash command</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Tab" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">A</span>
+                        </div>
+                    </td>
+                    <td>Select all text in message field</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + A" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">V</span>
+                        </div>
+                    </td>
+                    <td>Paste text or upload file from clipboard</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + V" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">@</span> + <span class="key">username</span>
+                        </div>
+                    </td>
+                    <td>Mention a specific user</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="@username" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">@channel</span>
+                        </div>
+                    </td>
+                    <td>Mention everyone in the channel</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="@channel" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">@here</span>
+                        </div>
+                    </td>
+                    <td>Mention everyone currently active in the channel</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="@here" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">#</span> + <span class="key">channel</span>
+                        </div>
+                    </td>
+                    <td>Link to a channel</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="#channel" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">:</span> + <span class="key">emoji</span> + <span class="key">:</span>
+                        </div>
+                    </td>
+                    <td>Add emoji reaction or emoji in message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut=":emoji:" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">/</span> + <span class="key">command</span>
+                        </div>
+                    </td>
+                    <td>Use slash commands</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="/command" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">K</span>
+                        </div>
+                    </td>
+                    <td>Open direct messages panel</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + K" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">Enter</span>
+                        </div>
+                    </td>
+                    <td>Start a new line in your message</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + Shift + Enter" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Ctrl</span> + <span class="key">T</span>
+                        </div>
+                    </td>
+                    <td>Open Threads view</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Ctrl + T" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">R</span>
+                        </div>
+                    </td>
+                    <td>Reply to thread (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="R" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">E</span>
+                        </div>
+                    </td>
+                    <td>Add emoji reaction (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="E" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">P</span>
+                        </div>
+                    </td>
+                    <td>Pin/unpin message (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="P" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">M</span>
+                        </div>
+                    </td>
+                    <td>Remind me about this message (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="M" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">A</span>
+                        </div>
+                    </td>
+                    <td>View message actions (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="A" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">Del</span>
+                        </div>
+                    </td>
+                    <td>Delete message (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="Del" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">U</span>
+                        </div>
+                    </td>
+                    <td>Mark message as unread (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="U" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="key-combo">
+                            <span class="key">S</span>
+                        </div>
+                    </td>
+                    <td>Share message (when message is selected)</td>
+                    <td class="actions-cell">
+                        <button class="copy-btn tooltip" data-shortcut="S" onclick="copyShortcut(this)">
+                            <i class="fas fa-copy"></i>
+                            <span class="tooltiptext">Click to copy</span>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-column">
+            <h3>About Shortcut Sensei</h3>
+            <p>Your ultimate guide to mastering keyboard shortcuts. We provide comprehensive guides and tips to help you work faster and more efficiently.</p>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Shortcut Sensei. All rights reserved.</p>
+        <div class="footer-column">
+            <h3>Quick Links</h3>
+            <ul class="footer-links">
+                <li><a href="../../home-page.html">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+                <li><a href="../../About.htm">About</a></li>
+                <li><a href="Privacy.html">Privacy Policy</a></li>
+            </ul>
         </div>
-    </footer>
+        <div class="footer-column">
+            <h3>Follow Us</h3>
+            <ul class="social-icons">
+                <li><a href="#"><i class="fab fa-facebook"></i></a></li>
+                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h3>Subscribe</h3>
+            <form class="subscribe-form">
+                <input type="email" placeholder="Your email" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 Shortcut Sensei. All rights reserved.</p>
+    </div>
+</footer>
+
+<a href="#top" class="back-to-top" style="text-decoration: none;">
+    <i class="fas fa-arrow-up"></i>
+</a>
 
 <script>
-    document.querySelector('.menu-toggle').addEventListener('click', function() {
-        document.querySelector('.main-nav ul').classList.toggle('show');
+// Copy shortcut functionality
+function copyShortcut(button) {
+    const shortcut = button.getAttribute('data-shortcut');
+    navigator.clipboard.writeText(shortcut).then(() => {
+        const tooltip = button.querySelector('.tooltiptext');
+        const originalText = tooltip.textContent;
+        tooltip.textContent = 'Copied!';
+        tooltip.classList.add('visible');
+        
+        setTimeout(() => {
+            tooltip.textContent = originalText;
+            tooltip.classList.remove('visible');
+        }, 2000);
     });
+}
+
+// Filter shortcuts functionality
+function filterShortcuts() {
+    const searchTerm = document.getElementById('shortcut-filter').value.toLowerCase();
+    const tables = document.querySelectorAll('.table-container');
+    let hasResults = false;
+
+    tables.forEach(container => {
+        const rows = container.querySelectorAll('tbody tr');
+        let containerHasResults = false;
+
+        rows.forEach(row => {
+            const shortcut = row.querySelector('.key-combo').textContent.toLowerCase();
+            const description = row.cells[1].textContent.toLowerCase();
+            
+            if (shortcut.includes(searchTerm) || description.includes(searchTerm)) {
+                row.style.display = '';
+                containerHasResults = true;
+                hasResults = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        container.style.display = containerHasResults ? '' : 'none';
+    });
+
+    document.getElementById('no-results').style.display = hasResults ? 'none' : 'block';
+}
+
+// Filter by category functionality
+function filterByCategory(category) {
+    const tables = document.querySelectorAll('.table-container');
+    const buttons = document.querySelectorAll('.category-btn');
+    
+    // Update active button
+    buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-category') === category) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Show/hide tables based on category
+    tables.forEach(container => {
+        if (category === 'all' || container.getAttribute('data-category') === category) {
+            container.style.display = '';
+        } else {
+            container.style.display = 'none';
+        }
+    });
+
+    // Clear search filter
+    document.getElementById('shortcut-filter').value = '';
+    document.getElementById('no-results').style.display = 'none';
+}
+
+// Action button functionality
+function downloadPDF() {
+    // This would typically integrate with a PDF generation library
+    alert('PDF download functionality would be implemented here');
+}
+
+function shareContent() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Slack Shortcuts - Shortcut Sensei',
+            text: 'Check out these useful Slack shortcuts!',
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+}
+
+function bookmarkPage() {
+    // This would integrate with user profile system
+    alert('Bookmark functionality would be implemented here');
+}
+
+// Mobile menu toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navUl = document.querySelector('.main-nav ul');
+    
+    if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+            navUl.classList.toggle('show');
+        });
+    }
+    
+    // Initialize dark mode
+    initializeDarkMode();
+    
+    // Style arrow keys
+    styleArrowKeys();
+});
+
+// Style arrow keys with blue color
+function styleArrowKeys() {
+    const keyElements = document.querySelectorAll('.key');
+    const arrowChars = ['↑', '↓', '←', '→', 'Page Up', 'Page Down', 'Home', 'End'];
+    
+    keyElements.forEach(key => {
+        const keyText = key.textContent.trim();
+        if (arrowChars.includes(keyText)) {
+            key.classList.add('arrow-key');
+        }
+    });
+}
+
+// Simple anchor link - no JavaScript needed
+
+// Dark mode functionality
+function initializeDarkMode() {
+    const darkModeToggle = document.querySelector('.dark-mode-toggle');
+    const body = document.body;
+    
+    // Check for saved dark mode preference or default to light mode
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    
+    if (isDarkMode) {
+        body.classList.add('dark-mode');
+        updateDarkModeIcon(true);
+    }
+    
+    // Add click event listener to dark mode toggle
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+    }
+}
+
+function toggleDarkMode() {
+    const body = document.body;
+    const isDarkMode = body.classList.toggle('dark-mode');
+    
+    // Save preference to localStorage
+    localStorage.setItem('darkMode', isDarkMode);
+    
+    // Update icon
+    updateDarkModeIcon(isDarkMode);
+}
+
+function updateDarkModeIcon(isDarkMode) {
+    const icon = document.querySelector('.dark-mode-toggle i');
+    if (icon) {
+        if (isDarkMode) {
+            icon.className = 'fa-solid fa-sun';
+        } else {
+            icon.className = 'fa-solid fa-moon';
+        }
+    }
+}
 </script>
 
 </body>

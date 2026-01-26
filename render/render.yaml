@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: shortcut-sensei-api
+    runtime: node
+    buildCommand: "cd backend && npm install"
+    startCommand: "cd backend && npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true # Render will generate a secure random value
+      - key: EMAIL_USER
+        sync: false # Set this manually
+      - key: EMAIL_PASS
+        sync: false # Set this manually
+    healthCheckPath: /health
+    disk:
+      name: uploads
+      mountPath: /opt/uploads
+      sizeGB: 1
+
+  - type: web
+    name: shortcut-sensei-frontend
+    runtime: static
+    buildCommand: "npm run build"
+    staticPublishPath: ./build
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: shortcut-sensei-db
+    databaseName: shortcut_sensei
+    user: shortcut_sensei_user
+    plan: free # Upgrade to paid plan for production
+
+envVarGroups:
+  - name: common-env
+    envVars:
+      - key: API_BASE_URL
+        value: https://shortcut-sensei-api.onrender.com

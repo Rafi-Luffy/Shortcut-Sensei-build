@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productivity Tips - Page 3 - Shortcut Sensei</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    
+    <!-- API-based Authentication -->
+    <script src="../../assets/js/api-auth.js" type="module"></script>
+
     <style>
         /* Base styles with CSS variables for easier theming */
         :root {
@@ -49,62 +54,286 @@
             background-color: var(--selection-color);
         }
         
-        /* Header styles - sticky with shadow */
+        /* Header styles - matching homepage */
         header {
-            background-color: var(--header-footer-bg);
+            background-color: #000000;
             color: #fff;
             padding: 15px 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             position: sticky;
             top: 0;
             z-index: 1000;
+            transition: all 0.3s ease;
         }
-
-        .container {
+        header .container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             width: 90%;
             margin: 0 auto;
+            gap: 0;
         }
-
         .logo a {
             color: #fff;
             text-decoration: none;
             font-size: 1.8em;
             font-weight: bold;
-            display: flex;
-            align-items: center;
+            transition: color 0.3s;
         }
-        
-        .logo-icon {
-            margin-right: 10px;
-            color: var(--primary-color);
+        .logo a:hover {
+            color: #9c27b0;
         }
-
+        .logo { margin: 0; margin-right: 60px; flex-shrink: 0; }
+        .main-nav { margin: 0; margin-right: 30px; flex-shrink: 0; }
         .main-nav ul {
             list-style-type: none;
             margin: 0;
             padding: 0;
             display: flex;
-            gap: 20px;
+            gap: 15px;
+            align-items: center;
         }
-
+        .main-nav ul li {
+            position: relative;
+        }
         .main-nav ul li a {
             color: #fff;
             text-decoration: none;
             padding: 10px 15px;
             display: block;
-            transition: all var(--transition-speed) ease;
-            border-radius: var(--border-radius);
+            transition: all 0.3s;
+            border-radius: 4px;
+        }
+        .main-nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .menu-toggle {
+            display: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #fff;
+            background: none;
+            border: none;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: 0;
+            flex-shrink: 0;
+            min-width: 0;
         }
 
-        .main-nav ul li a:hover {
-            background-color: #444;
+        .search-container {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border-radius: 25px;
+            padding: 5px 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: all 0.3s;
+            max-width: 200px;
+            min-width: 150px;
+            margin: 0;
+        }
+        .search-container input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 16px;
+            outline: none;
+            background-color: transparent;
+            color: #333;
+            transition: color 0.3s;
+        }
+        .search-container input[type="text"]::placeholder {
+            color: #888;
+        }
+        .search-container button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: #8a2be2;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            outline: none;
+            transition: background-color 0.3s;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .search-container button:hover {
+            background-color: #7a1dc5;
         }
         
-        .main-nav ul li a.active {
-            background-color: var(--primary-color);
+        /* Search Results Dropdown */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #1a1a1a;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            margin-top: 5px;
+        }
+
+        .search-result-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            transition: background-color 0.2s;
+            color: #fff;
+        }
+
+        .search-result-item:hover {
+            background-color: #2a2a2a;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Dark mode toggle - from page 4 */
+        .dark-mode-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode-toggle i {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover i {
+            transform: scale(1.1);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            color: #f4f4f4;
+        }
+
+        body.dark-mode .dark-mode-toggle:hover {
+            background-color: rgba(244, 244, 244, 0.1);
+        }
+
+        /* User menu */
+        .user-menu-container {
+            position: relative;
+        }
+
+        .user-avatar {
+            font-size: 36px;
+            line-height: 1;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform var(--transition-speed);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .user-dropdown a i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 5px 0;
+        }
+
+        .login-button-container {
+            flex-shrink: 0;
+            margin: 0;
+            min-width: fit-content;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #7b1fa2, #4a148c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
         }
 
         /* Blog page styles */
@@ -358,7 +587,7 @@
             background-color: var(--primary-hover);
         }
 
-        /* Newsletter section */
+        /*  */
         .newsletter-section {
             background-color: var(--light-card);
             border-radius: var(--border-radius);
@@ -444,30 +673,112 @@
             padding: 0 20px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
         }
-
-        .footer-section h3 {
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
             margin-bottom: 15px;
-            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--primary-color);
         }
 
-        .footer-section ul {
-            list-style: none;
+        .footer-column p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
         }
 
-        .footer-section ul li {
-            margin-bottom: 8px;
+        .footer-links, .social-icons {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
         }
 
-        .footer-section ul li a {
+        .footer-links li a, .social-icons li a {
             color: #ccc;
             text-decoration: none;
-            transition: color var(--transition-speed) ease;
+            transition: all var(--transition-speed);
+            display: inline-block;
         }
 
-        .footer-section ul li a:hover {
-            color: var(--primary-color);
+        .footer-links li a:hover {
+            color: #8a2be2;
+            transform: translateX(5px);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-icons li a {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all var(--transition-speed);
+        }
+
+        .social-icons li a:hover {
+            color: #fff;
+            background-color: #8a2be2;
+            transform: translateY(-5px);
+        }
+
+        .subscribe-form {
+            display: flex;
+            gap: 10px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .subscribe-form input[type="email"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 1em;
+        }
+
+        .subscribe-form button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--secondary-color);
+            color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color var(--transition-speed);
+            white-space: nowrap;
+        }
+
+        .subscribe-form button:hover {
+            background-color: #7a1dc5;
         }
 
         .footer-bottom {
@@ -502,30 +813,127 @@
                 min-width: 40px;
             }
         }
+
+        /* Dark mode toggle icon size */
+        .dark-mode-toggle i {
+            font-size: 24px;
+        }
+
+        /* User dropdown styles */
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e5e9;
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-dropdown .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 5px 0;
+        }
+
+        /* Login Button Styles */
+        .login-button-container {
+            position: relative;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #004494);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header>
+    <link rel="icon" href="/favicon.ico">
         <div class="container">
             <div class="logo">
-                <a href="../../home-page.html"><i class="fas fa-keyboard logo-icon"></i> Shortcut Sensei</a>
+                <a href="../../home-page.html">Shortcut Sensei</a>
             </div>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="blogs.html" class="active">Blogs</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                    <li><a href="../../About.htm">About</a></li>
+                    <li><a href="blogs.html">Blogs</a></li>
+                    <li><a href="/Applications.html">Applications</a></li>
+                    <li><a href="/About.html">About</a></li>
+                    <li><a href="/quizs/">Quiz</a></li>
                 </ul>
                 <span class="menu-toggle"><i class="fas fa-bars"></i></span>
             </nav>
-            <div class="search-container">
-                <input type="text" placeholder="Search...">
-                <button type="button"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="dark-mode-toggle">
-              <i class="fa-solid fa-moon"></i>
+            <div class="header-right">
+                <div class="search-container">
+                    <input type="text" placeholder="Search applications..." id="app" aria-label="Search applications">
+                    <button type="button" id="btn" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+                
+                <button class="dark-mode-toggle" id="darkModeToggle">
+                  <i class="fa-solid fa-moon"></i>
+                </button>
+                
+                <!-- User Menu -->
+                <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+                    <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()"></i>
+                    <div class="user-dropdown" id="userDropdownMenu">
+                        <a href="../../quizs/build/index.html?profile=true"><i class="fas fa-user"></i> User Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+
+                <!-- Login Button for non-authenticated users -->
+                <div class="login-button-container" id="loginButtonContainer">
+                    <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -535,110 +943,92 @@
         <!-- Page header -->
         <div class="page-header">
             <h1 class="page-title">Productivity Tips - Page 3</h1>
-            <p class="page-subtitle">Explore digital wellness, mindfulness, and sustainable productivity practices for long-term success</p>
-        </div>
-
-        <!-- Blog filters -->
-        <div class="blog-filters">
-            <div class="filter-dropdown">
-                <select id="category-filter">
-                    <option value="all">All Categories</option>
-                    <option value="wellness">Digital Wellness</option>
-                    <option value="mindfulness">Mindfulness</option>
-                    <option value="habits">Habits</option>
-                    <option value="communication">Communication</option>
-                    <option value="creativity">Creativity</option>
-                </select>
-            </div>
-            <div class="blog-search">
-                <i class="fas fa-search"></i>
-                <input type="text" id="blog-search-input" placeholder="Search blogs...">
-            </div>
+            <p class="page-subtitle">Master advanced productivity techniques and professional development strategies for peak performance</p>
         </div>
 
         <!-- Blog grid -->
         <div class="blog-grid">
             <!-- Blog card 1 -->
-            <div class="blog-card" data-category="wellness">
-                <img src="https://images.unsplash.com/photo-1611095564141-66afa38d9831?w=500&h=300&fit=crop" alt="Digital Detox" class="blog-image">
+            <div class="blog-card" data-category="leadership">
+                <img src="https://images.unsplash.com/photo-1560472355-109703aa3edc?w=500&h=300&fit=crop" alt="Leadership Skills" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Digital Wellness</span>
-                        <span>March 28, 2025</span>
+                        <span class="blog-category">Leadership</span>
+                        <span>March 16, 2025</span>
                     </div>
-                    <h2 class="blog-title">Digital Detox: Reclaim Your Focus and Mental Health</h2>
-                    <p class="blog-excerpt">Learn how to disconnect from digital distractions, set healthy boundaries with technology, and create space for deeper thinking and creativity.</p>
-                    <a href="https://www.verywellmind.com/why-and-how-to-do-a-digital-detox-4771321" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Essential Leadership Skills for the Modern Workplace</h2>
+                    <p class="blog-excerpt">Develop crucial leadership competencies including emotional intelligence, decision-making, and team motivation for today's dynamic work environment.</p>
+                    <a href="https://www.mindtools.com/pages/article/newLDR_50.htm" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 2 -->
-            <div class="blog-card" data-category="mindfulness">
-                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop" alt="Mindful Productivity" class="blog-image">
+            <div class="blog-card" data-category="learning">
+                <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&h=300&fit=crop" alt="Learning Techniques" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Mindfulness</span>
-                        <span>March 26, 2025</span>
+                        <span class="blog-category">Learning</span>
+                        <span>March 14, 2025</span>
                     </div>
-                    <h2 class="blog-title">Mindful Productivity: Working with Intention</h2>
-                    <p class="blog-excerpt">Discover how mindfulness practices can improve your focus, reduce stress, and help you work with greater intention and awareness.</p>
-                    <a href="https://www.mindful.org/how-to-be-more-productive/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Advanced Learning Techniques for Professionals</h2>
+                    <p class="blog-excerpt">Master evidence-based learning methods including spaced repetition, active recall, and the Feynman Technique to accelerate skill acquisition.</p>
+                    <a href="https://www.coursera.org/learn/learning-how-to-learn" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 3 -->
-            <div class="blog-card" data-category="habits">
-                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=300&fit=crop" alt="Atomic Habits" class="blog-image">
+            <div class="blog-card" data-category="efficiency">
+                <img src="../../images/apps/Microsoft Teams.jpg" alt="Decision Making" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Habits</span>
-                        <span>March 24, 2025</span>
+                        <span class="blog-category">Efficiency</span>
+                        <span>March 12, 2025</span>
                     </div>
-                    <h2 class="blog-title">Building Atomic Habits for Long-term Success</h2>
-                    <p class="blog-excerpt">Learn James Clear's proven framework for building good habits, breaking bad ones, and mastering the tiny behaviors that lead to remarkable results.</p>
-                    <a href="https://jamesclear.com/atomic-habits" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Strategic Decision Making Frameworks</h2>
+                    <p class="blog-excerpt">Learn proven frameworks like SWOT analysis, decision trees, and cost-benefit analysis to make better business and personal decisions faster.</p>
+                    <a href="https://www.lucidchart.com/blog/decision-making-process-steps" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 4 -->
-            <div class="blog-card" data-category="communication">
-                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop" alt="Effective Communication" class="blog-image">
+            <div class="blog-card" data-category="planning">
+                <img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=500&h=300&fit=crop" alt="Goal Setting" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Communication</span>
-                        <span>March 22, 2025</span>
+                        <span class="blog-category">Planning</span>
+                        <span>March 10, 2025</span>
                     </div>
-                    <h2 class="blog-title">Effective Communication in Remote Teams</h2>
-                    <p class="blog-excerpt">Master the art of clear, efficient communication in distributed teams. Learn tools, techniques, and best practices for remote collaboration.</p>
-                    <a href="https://hbr.org/2016/12/how-to-become-a-better-listener" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">SMART Goals and OKR Implementation</h2>
+                    <p class="blog-excerpt">Master goal-setting methodologies from SMART criteria to OKRs (Objectives and Key Results) used by top companies for maximum achievement.</p>
+                    <a href="https://www.whatmatters.com/faqs/okr-meaning-definition-example" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 5 -->
-            <div class="blog-card" data-category="creativity">
-                <img src="https://images.unsplash.com/photo-1531989417401-0f85f2aedb99?w=500&h=300&fit=crop" alt="Creative Productivity" class="blog-image">
+            <div class="blog-card" data-category="teamwork">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&h=300&fit=crop" alt="Team Collaboration" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Creativity</span>
-                        <span>March 20, 2025</span>
+                        <span class="blog-category">Teamwork</span>
+                        <span>March 8, 2025</span>
                     </div>
-                    <h2 class="blog-title">Balancing Structure and Creativity in Your Workflow</h2>
-                    <p class="blog-excerpt">Discover how to create systems that support creativity while maintaining productivity. Learn when to be structured and when to let ideas flow freely.</p>
-                    <a href="https://99u.adobe.com/articles/7103/stop-setting-goals-start-building-systems" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Building High-Performance Teams</h2>
+                    <p class="blog-excerpt">Discover strategies for fostering collaboration, managing conflicts, and creating psychological safety to build teams that consistently deliver exceptional results.</p>
+                    <a href="https://www.gallup.com/workplace/237020/five-keys-building-high-performance-team.aspx" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 6 -->
-            <div class="blog-card" data-category="wellness">
-                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=300&fit=crop" alt="Work-Life Balance" class="blog-image">
+            <div class="blog-card" data-category="efficiency">
+                <img src="../../images/apps/Telegram.jpg" alt="Systems Thinking" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Digital Wellness</span>
-                        <span>March 18, 2025</span>
+                        <span class="blog-category">Efficiency</span>
+                        <span>March 6, 2025</span>
                     </div>
-                    <h2 class="blog-title">Creating Sustainable Work-Life Balance</h2>
-                    <p class="blog-excerpt">Learn practical strategies for maintaining boundaries between work and personal life, preventing burnout, and sustaining long-term productivity.</p>
-                    <a href="https://www.betterup.com/blog/work-life-balance" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Systems Thinking for Complex Problem Solving</h2>
+                    <p class="blog-excerpt">Learn to identify patterns, understand interconnections, and solve complex problems by thinking in systems rather than isolated events.</p>
+                    <a href="https://www.analyticsinsight.net/systems-thinking-guide/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
@@ -650,61 +1040,242 @@
             <a href="blogs-page-2.html" class="pagination-btn">2</a>
             <a href="blogs-page-3.html" class="pagination-btn active">3</a>
             <a href="blogs-page-4.html" class="pagination-btn">4</a>
-            <a href="blogs-page-5.html" class="pagination-btn">5</a>
-            <span class="pagination-btn">...</span>
-            <a href="blogs-page-10.html" class="pagination-btn">10</a>
             <a href="blogs-page-4.html" class="pagination-btn"><i class="fas fa-chevron-right"></i></a>
         </div>
         
-        <!-- Newsletter section -->
-        <div class="newsletter-section">
-            <h2 class="newsletter-heading">Subscribe to Our Newsletter</h2>
-            <p class="newsletter-description">Get the latest shortcuts, productivity tips, and keyboard hacks delivered directly to your inbox. Stay updated with our weekly newsletter.</p>
-            <form class="newsletter-form">
-                <input type="email" placeholder="Your email address" required>
-                <button type="submit">Subscribe</button>
-            </form>
-        </div>
     </main>
 
     <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <div class="footer-section">
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <p>Your ultimate guide to mastering keyboard shortcuts. We provide comprehensive guides and tips to help you work faster and more efficiently.</p>
+            </div>
+            <div class="footer-column">
                 <h3>Quick Links</h3>
-                <ul>
+                <ul class="footer-links">
                     <li><a href="../../home-page.html">Home</a></li>
-                    <li><a href="../Applications_final.htm">Applications</a></li>
-                    <li><a href="blogs.html">Blogs</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
                     <li><a href="../../About.htm">About</a></li>
+                    <li><a href="Privacy.html">Privacy Policy</a></li>
                 </ul>
             </div>
-            <div class="footer-section">
-                <h3>Categories</h3>
-                <ul>
-                    <li><a href="https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec" target="_blank">Windows</a></li>
-                    <li><a href="https://support.apple.com/en-us/HT201236" target="_blank">macOS</a></li>
-                    <li><a href="https://chrome.google.com/webstore/category/extensions" target="_blank">Browsers</a></li>
-                    <li><a href="https://blog.hubspot.com/marketing/productivity-tips" target="_blank">Productivity</a></li>
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <ul class="social-icons">
+                    <li><a href="#"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://www.youtube.com/@sbmtech2389" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                    <li><a href="#"><i class="fab fa-instagram"></i></a></li>
                 </ul>
             </div>
-            <div class="footer-section">
-                <h3>Connect</h3>
-                <ul>
-                    <li><a href="https://www.twitter.com/shortcutsensei" target="_blank"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="https://www.facebook.com/shortcutsensei" target="_blank"><i class="fab fa-facebook"></i> Facebook</a></li>
-                    <li><a href="https://www.linkedin.com/company/shortcut-sensei" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
-                    <li><a href="https://github.com/shortcut-sensei" target="_blank"><i class="fab fa-github"></i> GitHub</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>About Shortcut Sensei</h3>
-                <p>Your ultimate guide to keyboard shortcuts and productivity tips. Master your tools and boost your efficiency with our comprehensive guides.</p>
+            <div class="footer-column">
+                <h3>Subscribe</h3>
+                <form class="subscribe-form" id="subscribeForm">
+                    <input type="email" id="emailInput" placeholder="Your email" required>
+                    <button type="submit" id="subscribeButton">Subscribe</button>
+                </form>
+                <p id="confirmationMessage" style="display: none; color: #8a2be2; font-weight: bold; margin-top: 10px;">Thanks for subscribing to our newsletter!</p>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Shortcut Sensei. All rights reserved.</p>
+            <p>&copy; 2025 Shortcut Sensei. All rights reserved.</p>
         </div>
     </footer>
+    <script>
+        // Newsletter subscription handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const subscribeForm = document.getElementById('subscribeForm');
+            const emailInput = document.getElementById('emailInput');
+            const confirmationMessage = document.getElementById('confirmationMessage');
+            
+            if (subscribeForm) {
+                subscribeForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = emailInput.value.trim();
+                    
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        subscribeForm.style.display = 'none';
+                        confirmationMessage.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            subscribeForm.style.display = 'flex';
+                            confirmationMessage.style.display = 'none';
+                            emailInput.value = '';
+                        }, 5000);
+                    } else {
+                        alert('Please enter a valid email address.');
+                    }
+                });
+            }
+        });
+        
+        // Filter functionality for blog pages
+        function filterCategory(category) {
+            const blogCards = document.querySelectorAll('.blog-card');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide cards based on category
+            blogCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Search functionality for blog pages
+        function searchBlogs() {
+            const searchInput = document.getElementById('searchInput');
+            const blogCards = document.querySelectorAll('.blog-card');
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            blogCards.forEach(card => {
+                const title = card.querySelector('.blog-title').textContent.toLowerCase();
+                const excerpt = card.querySelector('.blog-excerpt').textContent.toLowerCase();
+                const category = card.querySelector('.blog-category').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || excerpt.includes(searchTerm) || category.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Dark mode functionality
+        function toggleDarkMode() {
+            const body = document.body;
+            const isDarkMode = body.classList.toggle('dark-mode');
+            
+            // Save preference to localStorage
+            localStorage.setItem('darkMode', isDarkMode);
+            
+            // Update icon
+            updateDarkModeIcon(isDarkMode);
+        }
+
+        function updateDarkModeIcon(isDarkMode) {
+            const icon = document.querySelector('.dark-mode-toggle i');
+            if (icon) {
+                if (isDarkMode) {
+                    icon.className = 'fa-solid fa-sun';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                }
+            }
+        }
+
+        function initializeDarkMode() {
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            const body = document.body;
+            
+            // Check for saved dark mode preference or default to light mode
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                updateDarkModeIcon(true);
+            }
+            
+            // Add click event listener to dark mode toggle
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('click', toggleDarkMode);
+            }
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDarkMode();
+            
+            // Initialize search functionality
+            initializeSearch();
+        });
+        
+        // Search functionality for application shortcuts
+        function initializeSearch() {
+            // List of all applications with their page URLs
+            const applications = [
+                { name: "microsoft word", url: "../../Microsoft Word.htm" },
+                { name: "word", url: "../../Microsoft Word.htm" },
+                { name: "microsoft excel", url: "../../Microsoft Excell.htm" },
+                { name: "excel", url: "../../Microsoft Excell.htm" },
+                { name: "microsoft excell", url: "../../Microsoft Excell.htm" },
+                { name: "excell", url: "../../Microsoft Excell.htm" },
+                { name: "powerpoint", url: "../../Microsoft PowerPoint.htm" },
+                { name: "microsoft powerpoint", url: "../../Microsoft PowerPoint.htm" },
+                { name: "chrome", url: "../../Chrome.htm" },
+                { name: "google chrome", url: "../../Chrome.htm" },
+                { name: "firefox", url: "../../Firefox.htm" },
+                { name: "mozilla firefox", url: "../../Firefox.htm" },
+                { name: "photoshop", url: "../../Photoshop.htm" },
+                { name: "adobe photoshop", url: "../../Photoshop.htm" }
+            ];
+
+            const searchInput = document.getElementById('app');
+            const searchButton = document.getElementById('btn');
+            const searchResults = document.getElementById('searchResults');
+
+            // Function to display search results
+            function displaySearchResults(query) {
+                // Clear previous results
+                searchResults.innerHTML = '';
+                
+                if (!query) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                query = query.toLowerCase().trim();
+                
+                // Filter applications based on query (starts with query)
+                const matchingApps = applications.filter(app => app.name.startsWith(query));
+                
+                if (matchingApps.length === 0) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                // Create and display results
+                matchingApps.forEach(app => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.textContent = app.name.charAt(0).toUpperCase() + app.name.slice(1);
+                    
+                    resultItem.addEventListener('click', () => {
+                        window.location.href = app.url;
+                    });
+                    
+                    searchResults.appendChild(resultItem);
+                });
+                
+                searchResults.style.display = 'block';
+            }
+
+            // Event listeners
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    displaySearchResults(this.value);
+                });
+            }
+            
+            // Close results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (searchInput && searchResults && !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        }
+    </script>
+    
+        <script src="../../assets/js/global-user-manager.js"></script>
+        <script src="../../assets/js/unified-system.js"></script>
 </body>
-</html>
+    </html>

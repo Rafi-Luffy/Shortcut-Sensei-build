@@ -1,0 +1,195 @@
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+  authProvider: {
+    type: String,
+    enum: ['local', 'clerk'],
+    default: 'local',
+    required: true
+  },
+  clerkUserId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true
+  },
+  name: {
+    type: String,
+    required: [true, 'Please provide a name'],
+    trim: true
+  },
+  email: {
+    type: String,
+    required: [true, 'Please provide an email'],
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
+  },
+  password: {
+    type: String,
+    required: function() {
+      return (this.authProvider || 'local') === 'local';
+    },
+    minlength: 6,
+    select: false
+  },
+  avatar: {
+    type: String,
+    default: null
+  },
+  // Quiz Progress
+  quizProgress: [{
+    application: String,  // Application name for filtering
+    difficulty: String,   // easy, medium, hard
+    score: Number,
+    totalQuestions: Number,
+    timeSpent: Number,    // Time spent in seconds
+    correctAnswers: Number,
+    completedAt: {
+      type: Date,
+      default: Date.now
+    },
+    answers: [{
+      questionId: String,
+      answer: String,
+      isCorrect: Boolean
+    }]
+  }],
+  // Application Bookmarks
+  bookmarks: [{
+    applicationId: String,
+    applicationName: String,
+    bookmarkedAt: {
+      type: Date,
+      default: Date.now
+    },
+    shortcuts: [{
+      shortcutId: String,
+      keys: String,
+      description: String,
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }]
+  }],
+  // Gamification
+  badges: [{
+    badgeId: String,
+    badgeName: String,
+    earnedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  streak: {
+    current: {
+      type: Number,
+      default: 0
+    },
+    longest: {
+      type: Number,
+      default: 0
+    },
+    lastActivity: Date
+  },
+  learningStreak: {
+    current: {
+      type: Number,
+      default: 0
+    },
+    longest: {
+      type: Number,
+      default: 0
+    },
+    lastActivityDate: Date
+  },
+  activityLog: [{
+    action: String,
+    details: String,
+    metadata: mongoose.Schema.Types.Mixed,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  applicationProgress: [{
+    application: String,
+    shortcutsLearned: Number,
+    quizzesTaken: Number,
+    lastAccessed: Date
+  }],
+  achievements: [{
+    achievementId: String,
+    name: String,
+    description: String,
+    unlockedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  totalPoints: {
+    type: Number,
+    default: 0
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationToken: String,
+  emailVerificationExpires: Date,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+  hasLoggedIn: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  lastLogin: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.password) return next();
+  if (!this.isModified('password')) return next();
+  
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false;
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Get public profile
+userSchema.methods.getPublicProfile = function() {
+  return {
+    id: this._id,
+    name: this.name,
+    email: this.email,
+    avatar: this.avatar,
+    totalPoints: this.totalPoints,
+    streak: this.streak,
+    badges: this.badges,
+    createdAt: this.createdAt
+  };
+};
+
+module.exports = mongoose.model('User', userSchema);

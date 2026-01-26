@@ -1,138 +1,92 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const passport = require('passport');
-const FacebookStrategy = require('passport-facebook').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const { body, validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
+const path = require('path');
+const connectDB = require('./config/database');
+const appConfig = require('./config/production-config');
 
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
+
+// Initialize data sync service with error handling (disabled for testing)
+// try {
+//   const dataSyncService = require('./services/dataSyncService');
+//   dataSyncService.start();
+//   console.log('Data sync service started successfully');
+// } catch (error) {
+//   console.error('Failed to start data sync service:', error);
+// }
 
 const app = express();
 
 // Middleware
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
+app.use(express.json({ limit: appConfig.jsonBodyLimit }));
+app.use(cors(appConfig.corsOptions));
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for local development
+}));
 app.use(morgan('common'));
 
+// Serve static files from the parent directory
+app.use(express.static(path.join(__dirname, '..')));
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Rate limiting to prevent brute-force attacks
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per 15 minutes per IP
-  message: 'Too many requests from this IP, please try again after 15 minutes',
-});
+const limiter = rateLimit(appConfig.rateLimitOptions);
 app.use(limiter);
 
-// MongoDB Connection (commented out for now)
-// mongoose.connect(process.env.MONGODB_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// })
-// .then(() => console.log('MongoDB connected'))
-// .catch(err => console.error(err));
+// Import routes
+const authRoutes = require('./routes/auth');
+const clerkRoutes = require('./routes/clerk');
+const userRoutes = require('./routes/users');
+const questionRoutes = require('./routes/questions');
+// const analyticsRoutes = require('./routes/analytics'); // Commented out - file missing
+const searchRoutes = require('./routes/search');
+const syncRoutes = require('./routes/sync');
 
-// Passport configuration (commented out for now)
-// app.use(passport.initialize());
-
-// passport.use(new FacebookStrategy({
-//     clientID: process.env.FACEBOOK_APP_ID,
-//     clientSecret: process.env.FACEBOOK_APP_SECRET,
-//     callbackURL: process.env.FACEBOOK_CALLBACK_URL,
-//     profileFields: ['id', 'displayName', 'emails']
-//   },
-//   function(accessToken, refreshToken, profile, cb) {
-//     // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-//     //   return cb(err, user);
-//     // });
-//     return cb(null, profile);
-//   }
-// ));
-
-// passport.use(new GoogleStrategy({
-//     clientID: process.env.GOOGLE_CLIENT_ID,
-//     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//     callbackURL: process.env.GOOGLE_CALLBACK_URL
-//   },
-//   function(accessToken, refreshToken, profile, cb) {
-//     // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-//     //   return cb(err, user);
-//     // });
-//     return cb(null, profile);
-//   }
-// ));
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/clerk', clerkRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/questions', questionRoutes);
+// app.use('/api/analytics', analyticsRoutes); // Commented out - file missing
+app.use('/api/search', searchRoutes);
+app.use('/api/sync', syncRoutes);
 
 // Basic Routes
 app.get('/', (req, res) => {
-  res.send('API is running...');
+  res.json({
+    message: 'Shortcut Sensei API',
+    version: '1.0.0',
+    endpoints: {
+      users: '/api/users',
+      questions: '/api/questions',
+      analytics: '/api/analytics',
+      search: '/api/search'
+    }
+  });
 });
 
-// User Registration (example, needs actual user model and logic)
-app.post('/api/register',
-  [body('email').isEmail(), body('password').isLength({ min: 6 })],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { email, password } = req.body;
-    try {
-      // Replace with actual user creation logic
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      // Save user to DB
-      res.status(201).json({ message: 'User registered successfully' });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-);
-
-// User Login (example, needs actual user model and logic)
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    // Replace with actual user verification logic
-    // const user = await User.findOne({ email });
-    // if (!user) return res.status(400).json({ message: 'Invalid credentials' });
-
-    // const isMatch = await bcrypt.compare(password, user.password);
-    // if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const token = jwt.sign({ id: 'user_id' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  
+  res.json({
+    status: 'OK',
+    database: dbStatus,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
-
-// Auth with Facebook (commented out for now)
-// app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
-
-// app.get('/auth/facebook/callback',
-//   passport.authenticate('facebook', { failureRedirect: '/login' }),
-//   function(req, res) {
-//     // Successful authentication, redirect home.
-//     res.redirect('/');
-//   });
-
-// Auth with Google (commented out for now)
-// app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// app.get('/auth/google/callback',
-//   passport.authenticate('google', { failureRedirect: '/login' }),
-//   function(req, res) {
-//     // Successful authentication, redirect home.
-//     res.redirect('/');
-//   });
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -143,12 +97,12 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Newsletter subscription endpoint
+// Legacy newsletter subscription endpoint (keeping for backward compatibility)
 app.post('/api/newsletter/subscribe', [
-  body('email').isEmail().withMessage('Please provide a valid email address')
+  require('express-validator').body('email').isEmail().withMessage('Please provide a valid email address')
 ], async (req, res) => {
   try {
-    // Check for validation errors
+    const { validationResult } = require('express-validator');
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
@@ -236,7 +190,23 @@ app.post('/api/newsletter/subscribe', [
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : {}
+  });
+});
 
+// 404 handler - only for API routes, let static files pass through
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: 'API route not found' });
+});
 
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log('MongoDB connected successfully');
+  console.log(`API endpoints available at http://localhost:${PORT}/api`);
+});

@@ -6,96 +6,12 @@
     <title>Discord Shortcuts - Shortcut Sensei</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/app-search.css">
     
-    <!-- Firebase Authentication -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyA9FmWlWXqswDprmvaILZQnamrjBCsfgVs",
-            authDomain: "shortcut-sensei-1305f.firebaseapp.com",
-            projectId: "shortcut-sensei-1305f",
-            storageBucket: "shortcut-sensei-1305f.firebasestorage.app",
-            messagingSenderId: "598536091157",
-            appId: "1:598536091157:web:eff79326d42c5bba8e001c",
-            measurementId: "G-WZCS73D2W5"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.style.visibility = 'visible';
-            setupAuthListener();
-        });
-        
-        function setupAuthListener() {
-            onAuthStateChanged(auth, (user) => {
-                const userMenuContainer = document.getElementById('userMenuContainer');
-                const loginButtonContainer = document.getElementById('loginButtonContainer');
-                
-                if (user && user.emailVerified) {
-                    if (userMenuContainer) {
-                        userMenuContainer.style.display = 'block';
-                        updateUserProfile(user);
-                    }
-                    if (loginButtonContainer) {
-                        loginButtonContainer.style.display = 'none';
-                    }
-                } else {
-                    if (userMenuContainer) {
-                        userMenuContainer.style.display = 'none';
-                    }
-                    if (loginButtonContainer) {
-                        loginButtonContainer.style.display = 'block';
-                    }
-                }
-                
-                document.body.style.visibility = 'visible';
-            });
-        }
-        
-        function updateUserProfile(user) {
-            const headerAvatar = document.getElementById('headerAvatar');
-            if (headerAvatar) {
-                const savedAvatar = localStorage.getItem('userAvatarImage');
-                const avatar = savedAvatar || user.photoURL || 'https://via.placeholder.com/40/8B5FBF/FFFFFF?text=' + (user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U');
-                headerAvatar.src = avatar;
-            }
-        }
-        
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                alert('Successfully logged out!');
-                window.location.href = '../user/login_page_firebase.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-                alert('Failed to logout. Please try again.');
-            }
-        };
-
-        window.toggleUserMenu = function() {
-            const menu = document.getElementById('userDropdownMenu');
-            if (menu) {
-                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-            }
-        };
-        
-        document.addEventListener('click', function(e) {
-            const userMenu = document.getElementById('userMenuContainer');
-            const dropdown = document.getElementById('userDropdownMenu');
-            if (userMenu && dropdown && !userMenu.contains(e.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
-        
-        document.body.style.visibility = 'hidden';
-        setTimeout(() => {
-            document.body.style.visibility = 'visible';
-        }, 3000);
-    </script>
+    <!-- MongoDB Authentication -->
+    <script src="../../assets/js/mongodb-auth.js"></script>
+    <script src="../../assets/js/bookmark-handler.js"></script>
+    <script src="../../assets/js/app-search.js"></script>
     <style>
         /* Base styles with CSS variables for easier theming */
         :root {
@@ -121,6 +37,11 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
         }
         
         body {
@@ -166,11 +87,6 @@
             font-weight: bold;
             display: flex;
             align-items: center;
-        }
-        
-        .logo-icon {
-            margin-right: 10px;
-            color: var(--primary-color);
         }
 
         .main-nav ul {
@@ -761,23 +677,39 @@
         
         /* Back to top button */
         .back-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity var(--transition-speed), visibility var(--transition-speed), background-color var(--transition-speed), transform 0.2s;
-            z-index: 999;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            background-color: #06a3be !important;
+            color: white !important;
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            cursor: pointer !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transition: opacity 0.3s, visibility 0.3s, background-color 0.3s, transform 0.2s !important;
+            z-index: 9999 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+            border: none !important;
+        }
+        
+        .back-to-top:hover {
+            background-color: #048ea6 !important;
+            transform: translateY(-5px) !important;
+        }
+        
+        .back-to-top:hover {
+            background-color: #048ea6 !important;
+            transform: translateY(-5px) !important;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1 !important;
+            visibility: visible !important;
         }
         
         .back-to-top:hover {
@@ -1089,43 +1021,43 @@
     <script src="assets/js/global.js"></script>
 </head>
 <body>
-
+<a id="top"></a>
 <header>
     <div class="container">
         <div class="logo">
-            <a href="../../home-page.html"><i class="fas fa-keyboard logo-icon"></i> Shortcut Sensei</a>
+            <a href="../../home-page.html">Shortcut Sensei</a>
         </div>
         <nav class="main-nav">
             <ul>
-                <li><a href="../blogs/blogs.html">Blogs</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="../../About.htm">About</a></li>
+                <li><a href="/pages/blogs/blogs.html">Blogs</a></li>
+                <li><a href="/Applications.html">Applications</a></li>
+                <li><a href="/About.html">About</a></li>
+                <li><a href="/quizs/">Quiz</a></li>
             </ul>
             <span class="menu-toggle"><i class="fas fa-bars"></i></span>
         </nav>
         <div class="search-container">
-            <input type="text" placeholder="Search...">
+            <input type="text" placeholder="Search applications..." id="app">
             <button type="button"><i class="fas fa-search"></i></button>
+            <div id="appResults" class="app-search-results"></div>
         </div>
         <div class="dark-mode-toggle">
           <i class="fa-solid fa-moon"></i>
         </div>
         
         <!-- User Menu -->
-        <div class="user-menu-container" id="userMenuContainer">
-            <img src="https://via.placeholder.com/40/8B5FBF/FFFFFF?text=U" alt="User Avatar" class="user-avatar" id="headerAvatar" onclick="toggleUserMenu()">
+        <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+            <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
             <div class="user-dropdown" id="userDropdownMenu">
-                <a href="../user/user_profile.htm"><i class="fas fa-user"></i> My Profile</a>
-                <a href="../user/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <a href="/quizs/?profile=true"><i class="fas fa-user"></i> My Profile</a>
                 <div class="dropdown-divider"></div>
-                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
 
-        <!-- Login Button for non-authenticated users -->
-        <div class="login-button-container" id="loginButtonContainer" style="display: none;">
-            <button class="login-btn" onclick="window.location.href='../user/login_page_firebase.html'">
+        <!-- Login Button -->
+        <div class="login-button-container" id="loginButtonContainer">
+            <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
                 <i class="fas fa-sign-in-alt"></i> Login
             </button>
         </div>
@@ -1142,15 +1074,12 @@
         </p>
         
         <div class="featured-image-container">
-            <img src="./discord.jpg" alt="Discord Interface" class="featured-image">
+            <img src="../../images/apps/discord.jpg" alt="Discord Interface" class="featured-image">
         </div>
         
         <div class="actions-toolbar">
             <button class="action-button" id="print-btn">
                 <i class="fas fa-print"></i> Print Guide
-            </button>
-            <button class="action-button" id="download-btn">
-                <i class="fas fa-download"></i> Download PDF
             </button>
             <button class="action-button" id="share-btn">
                 <i class="fas fa-share-alt"></i> Share
@@ -2920,9 +2849,9 @@
     </table>
 </div>
     
-        <div class="back-to-top">
+        <a href="#top" class="back-to-top" style="text-decoration: none;">
             <i class="fas fa-arrow-up"></i>
-        </div>
+        </a>
         
         <div class="notification" id="notification"></div>
     </div>
@@ -3106,22 +3035,7 @@
             });
         });
         
-        // Back to top button
-        const backToTopButton = document.querySelector('.back-to-top');
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) { // Show button after scrolling down 300px
-                backToTopButton.classList.add('visible');
-            } else {
-                backToTopButton.classList.remove('visible');
-            }
-        });
-        
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
+        // Simple anchor link - no JavaScript needed
         
         // Print button functionality
         const printButton = document.getElementById('print-btn');
@@ -3150,6 +3064,13 @@
         });
     </script>
     
-    </body>
+        <script src="../../assets/js/unified-system.js"></script>
+        
+        <!-- Global Managers for User Profile, Bookmarks, and Dark Mode -->
+        <script src="../../assets/js/global-user-manager.js"></script>
+        <script src="../../assets/js/bookmark-manager.js"></script>
+        <script src="../../assets/js/dark-mode-manager.js"></script>
+        <script src="../../assets/js/footer-manager.js"></script>
+</body>
     </html>
     

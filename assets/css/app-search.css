@@ -1,0 +1,81 @@
+/* Universal Application Search Dropdown Styles */
+
+.app-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 5px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.app-search-result-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    color: #333;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.app-search-result-item:last-child {
+    border-bottom: none;
+}
+
+.app-search-result-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* Dark Mode Support */
+.dark-mode .app-search-results {
+    background: #1e1e1e;
+    border-color: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .app-search-result-item {
+    color: #e0e0e0;
+    border-bottom-color: #2d2d2d;
+}
+
+.dark-mode .app-search-result-item:hover {
+    background-color: #2d2d2d;
+}
+
+/* Scrollbar Styling for Light Mode */
+.app-search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.app-search-results::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.app-search-results::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.app-search-results::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Scrollbar Styling for Dark Mode */
+.dark-mode .app-search-results::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+.dark-mode .app-search-results::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+.dark-mode .app-search-results::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}

@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac Shortcuts - Shortcut Sensei</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <style>
+        /* Base styles with CSS variables for easier theming */
+        :root {
+            --primary-color: #06a3be;
+            --primary-hover: #048ea6;
+            --secondary-color: #8a2be2;
+            --secondary-hover: #7a1dc5;
+            --dark-bg: #121212;
+            --dark-card: #1e1e1e;
+            --dark-text: #f4f4f4;
+            --light-bg: #f4f4f4;
+            --light-card: #ffffff;
+            --light-text: #333;
+            --header-footer-bg: #000000;
+            --selection-color: rgba(6, 163, 190, 0.2);
+            --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --shadow-dark: 0 4px 8px rgba(0, 0, 0, 0.3);
+            --border-radius: 8px;
+            --transition-speed: 0.3s;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+        
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+        
+        ::selection {
+            background-color: var(--selection-color);
+        }
+        
+        /* Header styles - sticky with shadow */
+        header {
+            background-color: var(--header-footer-bg);
+            color: #fff;
+            padding: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .logo a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.8em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .main-nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        .main-nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            transition: all var(--transition-speed) ease;
+            border-radius: var(--border-radius);
+        }
+
+        .main-nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .main-nav ul li a.active {
+            background-color: var(--primary-color);
+        }
+
+        /* User Menu Styles */
+        .user-menu-container {
+            position: relative;
+            display: none;
+        }
+
+        .user-avatar {
+            font-size: 36px;
+            line-height: 1;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform var(--transition-speed);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.08);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            min-width: 180px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 16px;
+            color: var(--light-text);
+            text-decoration: none;
+            transition: background-color var(--transition-speed);
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .user-dropdown i {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 8px 0;
+        }
+
+        /* Login Button Styles */
+        .login-button-container {
+            display: none;
+        }
+
+        .login-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color var(--transition-speed);
+        }
+
+        .login-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .login-btn i {
+            margin-right: 5px;
+        }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            margin-left: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode-toggle i {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover i {
+            transform: scale(1.1);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            color: #f4f4f4;
+        }
+
+        body.dark-mode .dark-mode-toggle:hover {
+            background-color: rgba(244, 244, 244, 0.1);
+        }
+
+        /* Dark mode styles for user menu */
+        body.dark-mode .user-dropdown {
+            background: var(--dark-card);
+        }
+
+        body.dark-mode .user-dropdown a {
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .user-dropdown a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .dropdown-divider {
+            background-color: #444;
+        }
+
+        /* Main content styles */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .page-title {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--light-text);
+        }
+
+        body.dark-mode .page-title {
+            color: var(--dark-text);
+        }
+
+        .intro-container {
+            background-color: var(--light-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-light);
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        body.dark-mode .intro-container {
+            background-color: var(--dark-card);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .featured-image-container {
+            position: relative;
+            width: 100%;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .featured-image {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body.dark-mode .featured-image {
+            box-shadow: var(--shadow-dark);
+        }
+
+        .featured-image:hover {
+            transform: scale(1.02);
+        }
+
+        /* Standard key styling (align with other application pages) */
+        .key-combo {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .key {
+            display: inline-block;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+            box-shadow: 0 2px 0 #ccc;
+            transition: all var(--transition-speed);
+        }
+
+        body.dark-mode .key {
+            background-color: #333;
+            border-color: #555;
+            box-shadow: 0 2px 0 #222;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, var(--light-card) 0%, #f8f9fa 100%);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            transition: all var(--transition-speed);
+        }
+
+        body.dark-mode .hero-section {
+            background: linear-gradient(135deg, var(--dark-card) 0%, #1a1a1a 100%);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .hero-icon {
+            font-size: 4em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hero-title {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3em;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        body.dark-mode .hero-subtitle {
+            color: #ccc;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .actions-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .action-button {
+            background: var(--secondary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-speed);
+            box-shadow: var(--shadow-light);
+        }
+
+        .action-button:hover {
+            background: var(--secondary-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        body.dark-mode .stat-label {
+            color: #ccc;
+        }
+
+        /* Search and filter section */
+        .controls-section {
+            background: var(--light-card);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            margin-bottom: 40px;
+            transition: all var(--transition-speed);
+        }
+
+        body.dark-mode .controls-section {
+            background: var(--dark-card);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .search-filter-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: all var(--transition-speed);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(6, 163, 190, 0.1);
+        }
+
+        body.dark-mode .search-input {
+            background: var(--dark-bg);
+            border-color: #444;
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .search-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .category-filter {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            background: var(--light-card);
+            color: var(--light-text);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .category-filter:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        body.dark-mode .category-filter {
+            background: var(--dark-bg);
+            border-color: #444;
+            color: var(--dark-text);
+        }
+
+        /* Shortcuts grid */
+        .shortcuts-grid {
+            display: grid;
+            gap: 30px;
+        }
+
+        .category-section {
+            background: var(--light-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            padding: 30px;
+            transition: all var(--transition-speed);
+            overflow-x: auto;
+        }
+
+        body.dark-mode .category-section {
+            background: var(--dark-card);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .category-icon {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+
+        .category-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: var(--light-text);
+        }
+
+        body.dark-mode .category-title {
+            color: var(--dark-text);
+        }
+
+        .shortcuts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+
+        body.dark-mode .shortcuts-table {
+            box-shadow: var(--shadow-dark);
+        }
+
+        .shortcuts-table th,
+        .shortcuts-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+            word-break: break-word;
+        }
+
+        .shortcuts-table th:first-child,
+        .shortcuts-table td:first-child {
+            width: 30%;
+        }
+
+        body.dark-mode .shortcuts-table th,
+        body.dark-mode .shortcuts-table td {
+            border-bottom-color: #444;
+        }
+
+        .shortcuts-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        body.dark-mode .shortcuts-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .shortcuts-table tr:hover {
+            background-color: rgba(6, 163, 190, 0.05);
+        }
+
+        body.dark-mode .shortcuts-table tr:hover {
+            background-color: rgba(6, 163, 190, 0.1);
+        }
+
+        /* Legacy shortcut-key pill (kept for safety) */
+        .shortcut-key {
+            font-family: monospace;
+            font-weight: 700;
+        }
+
+        .shortcut-description {
+            color: var(--light-text);
+            line-height: 1.5;
+        }
+
+        body.dark-mode .shortcut-description {
+            color: var(--dark-text);
+        }
+
+        /* Copy button + tooltip (matches other application pages) */
+        .actions-cell {
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed);
+        }
+
+        .copy-btn:hover {
+            color: var(--secondary-color);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .copy-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 80px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -40px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(10px);
+            font-size: 0.8rem;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
+        }
+
+        .tooltip .tooltiptext.visible {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1100;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: var(--header-footer-bg);
+            color: #fff;
+            padding: 40px 20px 20px;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            text-align: left;
+        }
+
+        .footer-column h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .footer-column p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .social-icons {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-icons a {
+            color: #ccc;
+            font-size: 1.5em;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--primary-color);
+        }
+
+        .subscribe-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .subscribe-form input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .subscribe-form button {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .subscribe-form button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .main-nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero-title {
+                font-size: 2em;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1em;
+            }
+
+            .stats-container {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .search-filter-container {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .shortcuts-table {
+                font-size: 0.9em;
+            }
+
+            .shortcuts-table th,
+            .shortcuts-table td {
+                padding: 10px;
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 40px 20px;
+            }
+
+            .hero-title {
+                font-size: 1.8em;
+            }
+
+            .category-title {
+                font-size: 1.4em;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                text-align: center;
+            }
+        }
+    </style>
+    <script src="../../assets/js/api-auth-shared.js"></script>
+    <script src="../../assets/js/app-search.js"></script>
+    <script src="../../assets/js/global.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="../../home-page.html">Shortcut Sensei</a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/pages/blogs/blogs.html">Blogs</a></li>
+                    <li><a href="/Applications.html">Applications</a></li>
+                    <li><a href="/About.html">About</a></li>
+                    <li><a href="/quizs/">Quiz</a></li>
+                </ul>
+                <span class="menu-toggle"><i class="fas fa-bars"></i></span>
+            </nav>
+            <div class="search-container">
+                <input type="text" placeholder="Search applications..." id="app">
+                <button type="button"><i class="fas fa-search"></i></button>
+                <div id="appResults" class="app-search-results"></div>
+            </div>
+            <div class="dark-mode-toggle">
+              <i class="fa-solid fa-moon"></i>
+            </div>
+            
+            <!-- User Menu -->
+            <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+                <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
+                <div class="user-dropdown" id="userDropdownMenu">
+                    <a href="../user/user_profile.html"><i class="fas fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+
+            <!-- Login Button for non-authenticated users -->
+            <div class="login-button-container" id="loginButtonContainer">
+                <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">Top Shortcuts for Mac</h1>
+
+        <div class="intro-container">
+            <p class="intro-text">
+                Master your Mac with essential keyboard shortcuts for macOS. Learn faster ways to manage apps, windows, and Finder. Capture screenshots, edit text, and navigate with confidence. Use these shortcuts daily to work faster and smarter.
+            </p>
+
+            <div class="featured-image-container">
+                <img src="../../images/apps/mac_tips.jpg" alt="Mac shortcuts" class="featured-image">
+            </div>
+
+            <div class="actions-toolbar">
+                <button class="action-button" id="print-btn">
+                    <i class="fas fa-print"></i> Print Guide
+                </button>
+                <button class="action-button" id="share-btn">
+                    <i class="fas fa-share-alt"></i> Share
+                </button>
+                <button class="action-button" id="bookmark-btn">
+                    <i class="fas fa-bookmark"></i> Bookmark
+                </button>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <section class="controls-section">
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search shortcuts...">
+                </div>
+                <select class="category-filter" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="system">System & App Management</option>
+                    <option value="finder">Finder & File Management</option>
+                    <option value="screenshots">Screenshots & Recording</option>
+                    <option value="text">Document & Text Editing</option>
+                    <option value="browser">Web Browser</option>
+                    <option value="power">Sleep & Power</option>
+                    <option value="accessibility">Accessibility</option>
+                    <option value="startup">Startup & Recovery</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Shortcuts Grid -->
+        <div class="shortcuts-grid" id="shortcutsGrid">
+            
+            <!-- Essential System & App Management -->
+            <section class="category-section" data-category="system">
+                <div class="category-header">
+                    <i class="fas fa-cogs category-icon"></i>
+                    <h2 class="category-title">Essential System & App Management</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + Spacebar</span></td>
+                            <td class="shortcut-description">Open Spotlight search</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + Tab</span></td>
+                            <td class="shortcut-description">Switch to the next most recently used app</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + `</span></td>
+                            <td class="shortcut-description">Switch between windows of the current app</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + Q</span></td>
+                            <td class="shortcut-description">Quit the current application</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + Esc</span></td>
+                            <td class="shortcut-description">Open the Force Quit Applications window</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + H</span></td>
+                            <td class="shortcut-description">Hide the windows of the front app</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + H</span></td>
+                            <td class="shortcut-description">Hide all other apps except for the front one</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + M</span></td>
+                            <td class="shortcut-description">Minimize the front window to the Dock</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + M</span></td>
+                            <td class="shortcut-description">Minimize all windows of the front app</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + W</span></td>
+                            <td class="shortcut-description">Close the front window</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + W</span></td>
+                            <td class="shortcut-description">Close all windows of the current app</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + N</span></td>
+                            <td class="shortcut-description">Open a new window or document</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + ⌘ + F</span></td>
+                            <td class="shortcut-description">Use the app in full screen</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + ,</span></td>
+                            <td class="shortcut-description">Open preferences for the front app</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">Spacebar</span></td>
+                            <td class="shortcut-description">Use Quick Look to preview the selected item</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">Fn + Q</span></td>
+                            <td class="shortcut-description">Create a Quick Note</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Finder & File Management -->
+            <section class="category-section" data-category="finder">
+                <div class="category-header">
+                    <i class="fas fa-folder-open category-icon"></i>
+                    <h2 class="category-title">Finder & File Management</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + N</span></td>
+                            <td class="shortcut-description">Create a new folder</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + D</span></td>
+                            <td class="shortcut-description">Duplicate the selected files</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + Delete</span></td>
+                            <td class="shortcut-description">Move the selected item to the Trash</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + Delete</span></td>
+                            <td class="shortcut-description">Empty the Trash (with confirmation)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⇧ + ⌘ + Delete</span></td>
+                            <td class="shortcut-description">Empty the Trash without confirmation</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + I</span></td>
+                            <td class="shortcut-description">Show the Get Info window for a selected file</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">Return</span></td>
+                            <td class="shortcut-description">Rename the selected item</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + ↓</span></td>
+                            <td class="shortcut-description">Open the selected item</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + ↑</span></td>
+                            <td class="shortcut-description">Open the folder that contains the current folder</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + G</span></td>
+                            <td class="shortcut-description">Open the "Go to Folder" window</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + H</span></td>
+                            <td class="shortcut-description">Open the Home folder</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + D</span></td>
+                            <td class="shortcut-description">Open the Desktop folder</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + A</span></td>
+                            <td class="shortcut-description">Open the Applications folder</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + O</span></td>
+                            <td class="shortcut-description">Open the Documents folder</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + L</span></td>
+                            <td class="shortcut-description">Open the Downloads folder</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + 1/2/3/4</span></td>
+                            <td class="shortcut-description">Change the Finder view (Icon, List, Column, Gallery)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + K</span></td>
+                            <td class="shortcut-description">Open the Connect to Server window</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + V</span></td>
+                            <td class="shortcut-description">Move files (cut and paste)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Screenshots & Screen Recording -->
+            <section class="category-section" data-category="screenshots">
+                <div class="category-header">
+                    <i class="fas fa-camera category-icon"></i>
+                    <h2 class="category-title">Screenshots & Screen Recording</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + 3</span></td>
+                            <td class="shortcut-description">Capture the entire screen</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + 4</span></td>
+                            <td class="shortcut-description">Capture a selected portion of the screen</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + 4, then Spacebar</span></td>
+                            <td class="shortcut-description">Capture a specific window or menu</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + 5</span></td>
+                            <td class="shortcut-description">Open the Screenshot and screen recording options</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + 6</span></td>
+                            <td class="shortcut-description">Capture the Touch Bar</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">Add ⌃ to any screenshot shortcut</span></td>
+                            <td class="shortcut-description">Copy the screenshot to the clipboard instead of saving it</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Document & Text Editing -->
+            <section class="category-section" data-category="text">
+                <div class="category-header">
+                    <i class="fas fa-edit category-icon"></i>
+                    <h2 class="category-title">Document & Text Editing</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + A</span></td>
+                            <td class="shortcut-description">Select all items</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + C</span></td>
+                            <td class="shortcut-description">Copy the selected item</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + V</span></td>
+                            <td class="shortcut-description">Paste the contents of the Clipboard</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + X</span></td>
+                            <td class="shortcut-description">Cut the selected item</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⇧ + ⌘ + V</span></td>
+                            <td class="shortcut-description">Paste text and match the destination formatting</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + Z</span></td>
+                            <td class="shortcut-description">Undo the previous command</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + Z</span></td>
+                            <td class="shortcut-description">Redo the previous command</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + F</span></td>
+                            <td class="shortcut-description">Find items in a document</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + S</span></td>
+                            <td class="shortcut-description">Save the current document</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + P</span></td>
+                            <td class="shortcut-description">Print the current document</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + B</span></td>
+                            <td class="shortcut-description">Bold the selected text</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + I</span></td>
+                            <td class="shortcut-description">Italicize the selected text</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + U</span></td>
+                            <td class="shortcut-description">Underline the selected text</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + A</span></td>
+                            <td class="shortcut-description">Move to the beginning of a line or paragraph</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + E</span></td>
+                            <td class="shortcut-description">Move to the end of a line or paragraph</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + ←</span></td>
+                            <td class="shortcut-description">Move the cursor to the beginning of the current line</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + →</span></td>
+                            <td class="shortcut-description">Move the cursor to the end of the current line</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ←</span></td>
+                            <td class="shortcut-description">Move the cursor to the beginning of the previous word</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + →</span></td>
+                            <td class="shortcut-description">Move the cursor to the end of the next word</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">Add ⇧ to any cursor movement</span></td>
+                            <td class="shortcut-description">Select text while moving the cursor</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">Fn + Delete</span></td>
+                            <td class="shortcut-description">Forward delete (deletes characters to the right of the cursor)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + K</span></td>
+                            <td class="shortcut-description">Delete the text between the cursor and the end of the line</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + ⌘ + Spacebar</span></td>
+                            <td class="shortcut-description">Show the Character Viewer to insert emojis and symbols</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + ⌘ + D</span></td>
+                            <td class="shortcut-description">Look up a selected word's definition</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Web Browser -->
+            <section class="category-section" data-category="browser">
+                <div class="category-header">
+                    <i class="fas fa-globe category-icon"></i>
+                    <h2 class="category-title">Web Browser (Safari, Chrome, Firefox)</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + T</span></td>
+                            <td class="shortcut-description">Open a new tab</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + W</span></td>
+                            <td class="shortcut-description">Close the current tab</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + T</span></td>
+                            <td class="shortcut-description">Reopen the last closed tab</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + Tab</span></td>
+                            <td class="shortcut-description">Switch to the next tab</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + ⇧ + Tab</span></td>
+                            <td class="shortcut-description">Switch to the previous tab</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + L</span></td>
+                            <td class="shortcut-description">Highlight the URL/search bar</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + R</span></td>
+                            <td class="shortcut-description">Reload the current page</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + [</span></td>
+                            <td class="shortcut-description">Go back to the previous page</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + ]</span></td>
+                            <td class="shortcut-description">Go forward to the next page</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + +</span></td>
+                            <td class="shortcut-description">Zoom in</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + -</span></td>
+                            <td class="shortcut-description">Zoom out</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + 0</span></td>
+                            <td class="shortcut-description">Reset zoom to actual size</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + N</span></td>
+                            <td class="shortcut-description">Open a new private browsing window</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Sleep, Log Out & Shut Down -->
+            <section class="category-section" data-category="power">
+                <div class="category-header">
+                    <i class="fas fa-power-off category-icon"></i>
+                    <h2 class="category-title">Sleep, Log Out & Shut Down</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + ⌘ + Q</span></td>
+                            <td class="shortcut-description">Immediately lock your screen</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧ + ⌘ + Q</span></td>
+                            <td class="shortcut-description">Log out of your user account (with confirmation)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + Power Button</span></td>
+                            <td class="shortcut-description">Put your Mac to sleep</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + Power Button</span></td>
+                            <td class="shortcut-description">Show a dialog to restart, sleep, or shut down</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + ⌘ + Power Button</span></td>
+                            <td class="shortcut-description">Force your Mac to restart</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Accessibility -->
+            <section class="category-section" data-category="accessibility">
+                <div class="category-header">
+                    <i class="fas fa-universal-access category-icon"></i>
+                    <h2 class="category-title">Accessibility</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + F5</span></td>
+                            <td class="shortcut-description">Show the Accessibility Shortcuts panel</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + F5</span></td>
+                            <td class="shortcut-description">Turn VoiceOver on or off</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + 8</span></td>
+                            <td class="shortcut-description">Turn Zoom on or off</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + +</span></td>
+                            <td class="shortcut-description">Zoom in</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + -</span></td>
+                            <td class="shortcut-description">Zoom out</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌃ + ⌥ + ⌘ + 8</span></td>
+                            <td class="shortcut-description">Invert colors</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Startup & Recovery -->
+            <section class="category-section" data-category="startup">
+                <div class="category-header">
+                    <i class="fas fa-cog category-icon"></i>
+                    <h2 class="category-title">Startup & Recovery</h2>
+                </div>
+                <table class="shortcuts-table">
+                    <thead>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + R</span></td>
+                            <td class="shortcut-description">Start up from macOS Recovery</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥</span></td>
+                            <td class="shortcut-description">Start up to Startup Manager to select a startup disk</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⇧</span></td>
+                            <td class="shortcut-description">Start up in Safe Mode</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">D</span></td>
+                            <td class="shortcut-description">Start up to Apple Diagnostics</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌥ + ⌘ + P + R</span></td>
+                            <td class="shortcut-description">Reset NVRAM or PRAM</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">T</span></td>
+                            <td class="shortcut-description">Start up in Target Disk Mode</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">⌘ + V</span></td>
+                            <td class="shortcut-description">Start up in Verbose Mode</td>
+                        </tr>
+                        <tr>
+                            <td><span class="shortcut-key">C</span></td>
+                            <td class="shortcut-description">Start from a bootable CD, DVD, or USB drive</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <p>Your ultimate guide to mastering keyboard shortcuts. We provide comprehensive guides and tips to help you work faster and more efficiently.</p>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="../../home-page.html">Home</a></li>
+                    <li><a href="../../home-page.html#features">Features</a></li>
+                    <li><a href="../../home-page.html#testimonials">Testimonials</a></li>
+                    <li><a href="../../About.html">About</a></li>
+                    <li><a href="../../Privacy.html">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <ul class="social-icons">
+                    <li><a href="https://www.facebook.com/profile.php?id=100015198880002"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://twitter.com/RAFI09925204"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="https://www.linkedin.com/in/rafi-s-b-m-a3492a265/"><i class="fab fa-linkedin"></i></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Subscribe</h3>
+                <form class="subscribe-form">
+                    <input id="emailInput" type="email" placeholder="Your email" required>
+                    <button id="subscribeButton" type="submit">Subscribe</button>
+                </form>
+                <p id="confirmationMessage" style="display: none;">Thank you for subscribing to our newsletter!</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Shortcut Sensei. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Add Actions column + Copy buttons (match other application pages)
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            if (!notification) return;
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 2500);
+        }
+
+        function addCopyActionsToTables() {
+            const tables = document.querySelectorAll('.shortcuts-table');
+
+            tables.forEach(table => {
+                const headerRow = table.querySelector('thead tr');
+                if (headerRow && headerRow.children.length === 2) {
+                    const thShortcut = headerRow.children[0];
+                    thShortcut.textContent = 'Key Combination';
+                    thShortcut.style.width = '30%';
+
+                    const thActions = document.createElement('th');
+                    thActions.textContent = 'Actions';
+                    thActions.style.width = '10%';
+                    headerRow.appendChild(thActions);
+                }
+
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    if (row.children.length >= 3) return;
+                    const shortcutEl = row.querySelector('.shortcut-key');
+                    const shortcutText = shortcutEl ? shortcutEl.textContent.trim() : '';
+
+                    // Convert shortcut text into "key" pills for consistent styling
+                    if (shortcutEl) {
+                        const raw = shortcutText;
+                        const parts = raw
+                            .split('+')
+                            .map(p => p.trim())
+                            .filter(Boolean);
+
+                        const combo = document.createElement('div');
+                        combo.className = 'key-combo';
+
+                        parts.forEach((part, idx) => {
+                            const keySpan = document.createElement('span');
+                            keySpan.className = 'key';
+                            keySpan.textContent = part;
+                            combo.appendChild(keySpan);
+                            if (idx < parts.length - 1) {
+                                combo.appendChild(document.createTextNode(' + '));
+                            }
+                        });
+
+                        shortcutEl.replaceWith(combo);
+                    }
+
+                    const td = document.createElement('td');
+                    td.className = 'actions-cell';
+
+                    const btn = document.createElement('button');
+                    btn.className = 'copy-btn tooltip';
+                    btn.type = 'button';
+                    btn.dataset.shortcut = shortcutText;
+
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-copy';
+
+                    const tip = document.createElement('span');
+                    tip.className = 'tooltiptext';
+                    tip.textContent = 'Click to copy';
+
+                    btn.appendChild(icon);
+                    btn.appendChild(tip);
+                    td.appendChild(btn);
+                    row.appendChild(td);
+                });
+            });
+        }
+
+        function wireCopyButtons() {
+            document.addEventListener('click', (event) => {
+                const button = event.target.closest('.copy-btn');
+                if (!button) return;
+
+                const shortcut = button.dataset.shortcut || '';
+                if (!shortcut) return;
+
+                navigator.clipboard.writeText(shortcut).then(() => {
+                    const tooltip = button.querySelector('.tooltiptext');
+                    if (tooltip) {
+                        tooltip.classList.add('visible');
+                        setTimeout(() => tooltip.classList.remove('visible'), 2000);
+                    }
+                    showNotification('Shortcut copied to clipboard!');
+                });
+            });
+        }
+
+        // Print button
+        const printButton = document.getElementById('print-btn');
+        if (printButton) {
+            printButton.addEventListener('click', () => window.print());
+        }
+
+        addCopyActionsToTables();
+        wireCopyButtons();
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const shortcutSections = document.querySelectorAll('.category-section');
+
+        function filterShortcuts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+
+            shortcutSections.forEach(section => {
+                const category = section.dataset.category;
+                const shouldShowCategory = !selectedCategory || category === selectedCategory;
+                
+                if (!shouldShowCategory) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                const rows = section.querySelectorAll('.shortcuts-table tbody tr');
+                let hasVisibleRows = false;
+
+                rows.forEach(row => {
+                    const shortcutText = row.querySelector('.shortcut-key').textContent.toLowerCase();
+                    const descriptionText = row.querySelector('.shortcut-description').textContent.toLowerCase();
+                    
+                    const matchesSearch = !searchTerm || 
+                        shortcutText.includes(searchTerm) || 
+                        descriptionText.includes(searchTerm);
+
+                    if (matchesSearch) {
+                        row.style.display = '';
+                        hasVisibleRows = true;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                section.style.display = hasVisibleRows ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('input', filterShortcuts);
+        categoryFilter.addEventListener('change', filterShortcuts);
+
+    </script>
+
+    <div id="notification" class="notification" aria-live="polite"></div>
+
+    <script src="../../assets/js/unified-system.js"></script>
+    <script src="../../assets/js/global-user-manager.js"></script>
+    <script src="../../assets/js/bookmark-manager.js"></script>
+    <script src="../../assets/js/dark-mode-manager.js"></script>
+    <script src="../../assets/js/footer-manager.js"></script>
+</body>
+</html>

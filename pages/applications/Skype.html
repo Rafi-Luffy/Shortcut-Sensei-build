@@ -6,6 +6,12 @@
     <title>Skype Shortcuts - Shortcut Sensei</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/app-search.css">
+    
+    <!-- MongoDB Authentication -->
+    <script src="../../assets/js/mongodb-auth.js"></script>
+    <script src="../../assets/js/bookmark-handler.js"></script>
+    <script src="../../assets/js/app-search.js"></script>
     <style>
         /* Base styles with CSS variables for easier theming */
         :root {
@@ -185,6 +191,105 @@
         .dark-mode-toggle i {
             font-size: 24px;
             transition: transform 0.4s ease;
+        }
+        
+        /* User Menu Styles */
+        .user-menu-container {
+            position: relative;
+            margin-left: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #9c27b0;
+            transition: all 0.3s ease;
+            object-fit: cover;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            border-color: #7b1fa2;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 10px 0;
+            min-width: 200px;
+            margin-top: 10px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-dropdown .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 5px 0;
+        }
+
+        /* Login Button Styles */
+        .login-button-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(156, 39, 176, 0.3);
         }
         
         /* Main content */
@@ -426,6 +531,9 @@
             box-shadow: var(--shadow-light);
             transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
             overflow: hidden;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .dark-mode .table-container {
@@ -566,6 +674,25 @@
             background-color: #333;
             border-color: #555;
             box-shadow: 0 2px 0 #222;
+        }
+        
+        /* Arrow keys special styling */
+        .key.arrow-key {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border-color: #2a5298;
+            box-shadow: 0 2px 0 #1e3c72;
+        }
+        
+        .key.arrow-key:hover {
+            background: linear-gradient(135deg, #2a5298, #3467b8);
+            transform: translateY(-1px);
+        }
+        
+        .dark-mode .key.arrow-key {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border-color: #2a5298;
+            box-shadow: 0 2px 0 #1e3c72;
         }
         
         /* Back to top button */
@@ -902,23 +1029,41 @@
 <header>
     <div class="container">
         <div class="logo">
-            <a href="../../home-page.html"><i class="fas fa-keyboard logo-icon"></i> Shortcut Sensei</a>
+            <a href="../../home-page.html">Shortcut Sensei</a>
         </div>
         <nav class="main-nav">
             <ul>
-                <li><a href="../blogs/blogs.html">Blogs</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="../../About.htm">About</a></li>
+                <li><a href="/pages/blogs/blogs.html">Blogs</a></li>
+                <li><a href="/Applications.html">Applications</a></li>
+                <li><a href="/About.html">About</a></li>
+                <li><a href="/quizs/">Quiz</a></li>
             </ul>
             <span class="menu-toggle"><i class="fas fa-bars"></i></span>
         </nav>
         <div class="search-container">
-            <input type="text" placeholder="Search...">
+            <input type="text" placeholder="Search applications..." id="app">
             <button type="button"><i class="fas fa-search"></i></button>
+            <div id="appResults" class="app-search-results"></div>
         </div>
         <div class="dark-mode-toggle">
           <i class="fa-solid fa-moon"></i>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+            <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
+            <div class="user-dropdown" id="userDropdownMenu">
+                <a href="/quizs/?profile=true"><i class="fas fa-user"></i> My Profile</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <!-- Login Button -->
+        <div class="login-button-container" id="loginButtonContainer">
+            <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
         </div>
     </div>
 </header>
@@ -933,20 +1078,17 @@
         </p>
         
         <div class="featured-image-container">
-            <img src="Skype.jpg" alt="Skype Interface" class="featured-image">
+            <img src="../../images/apps/Skype.jpg" alt="Skype Interface" class="featured-image">
         </div>
         
         <div class="actions-toolbar">
-            <button class="action-button" id="print-btn">
+            <button class="action-button" id="print-btn" onclick="window.print()">
                 <i class="fas fa-print"></i> Print Guide
             </button>
-            <button class="action-button" id="download-btn">
-                <i class="fas fa-download"></i> Download PDF
-            </button>
-            <button class="action-button" id="share-btn">
+            <button class="action-button" id="share-btn" onclick="shareContent()">
                 <i class="fas fa-share-alt"></i> Share
             </button>
-            <button class="action-button" id="bookmark-btn">
+            <button class="action-button" id="bookmark-btn" onclick="bookmarkPage()">
                 <i class="fas fa-bookmark"></i> Bookmark
             </button>
         </div>
@@ -2352,18 +2494,18 @@
                 });
                 
                 // Show/hide section titles based on visible rows
-                const sectionTitle = table.previousElementSibling.previousElementSibling;
-                const sectionDesc = table.previousElementSibling;
                 const tableContainer = table.closest('.table-container');
+                const sectionTitle = tableContainer.querySelector('.section-title');
+                const sectionDesc = tableContainer.querySelector('.section-description');
                 
                 if (tableHasVisibleRows) {
                     tableContainer.style.display = '';
-                    sectionTitle.style.display = '';
-                    sectionDesc.style.display = '';
+                    if (sectionTitle) sectionTitle.style.display = '';
+                    if (sectionDesc) sectionDesc.style.display = '';
                 } else {
                     tableContainer.style.display = 'none';
-                    sectionTitle.style.display = 'none';
-                    sectionDesc.style.display = 'none';
+                    if (sectionTitle) sectionTitle.style.display = 'none';
+                    if (sectionDesc) sectionDesc.style.display = 'none';
                 }
             });
             
@@ -2390,19 +2532,19 @@
                 
                 tables.forEach(table => {
                     const tableCategory = table.getAttribute('data-category');
-                    const sectionTitle = table.previousElementSibling.previousElementSibling;
-                    const sectionDesc = table.previousElementSibling;
                     const tableContainer = table.closest('.table-container');
+                    const sectionTitle = tableContainer.querySelector('.section-title');
+                    const sectionDesc = tableContainer.querySelector('.section-description');
                     
                     if (category === 'all' || category === tableCategory) {
                         tableContainer.style.display = '';
-                        sectionTitle.style.display = '';
-                        sectionDesc.style.display = '';
+                        if (sectionTitle) sectionTitle.style.display = '';
+                        if (sectionDesc) sectionDesc.style.display = '';
                         hasVisibleTables = true;
                     } else {
                         tableContainer.style.display = 'none';
-                        sectionTitle.style.display = 'none';
-                        sectionDesc.style.display = 'none';
+                        if (sectionTitle) sectionTitle.style.display = 'none';
+                        if (sectionDesc) sectionDesc.style.display = 'none';
                     }
                 });
                 
@@ -2483,8 +2625,104 @@
                 link.classList.add('active');
             }
         });
+
+        // Dark mode toggle function
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Authentication functions
+        function showLoginForm() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function hideLoginForm() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        // User menu functionality
+
+        function logout() {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+                updateUserInterface(null);
+            }).catch((error) => {
+                console.error('Sign out error:', error);
+            });
+        }
+
+        function updateUserInterface(user) {
+            const userMenuContainer = document.querySelector('.user-menu-container');
+            const loginButtonContainer = document.querySelector('.login-button-container');
+            
+            if (user) {
+                userMenuContainer.style.display = 'block';
+                loginButtonContainer.style.display = 'none';
+                
+                const userAvatar = document.querySelector('.user-avatar');
+                const userEmail = document.querySelector('.user-email');
+                
+                if (user.photoURL) {
+                    userAvatar.src = user.photoURL;
+                } else {
+                    userAvatar.src = '/images/default-avatar.png';
+                }
+                
+                if (userEmail) {
+                    userEmail.textContent = user.email;
+                }
+            } else {
+                userMenuContainer.style.display = 'none';
+                loginButtonContainer.style.display = 'block';
+            }
+        }
+
+        // Action button functions
+        function shareContent() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Skype Shortcuts - Shortcut Sensei',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showNotification('Link copied to clipboard!');
+            }
+        }
+
+        function bookmarkPage() {
+            showNotification('Bookmark feature will be available soon!');
+        }
+
+        // Style arrow keys with blue color
+        function styleArrowKeys() {
+            const keys = document.querySelectorAll('.key');
+            const arrowChars = ['↑', '↓', '←', '→', 'Page Up', 'Page Down', 'Home', 'End'];
+            keys.forEach(key => {
+                const keyText = key.textContent.trim();
+                if (arrowChars.includes(keyText)) {
+                    key.classList.add('arrow-key');
+                }
+            });
+        }
+
+        // Initialize arrow key styling
+        styleArrowKeys();
     </script>
     
-    </body>
+        <script src="../../assets/js/unified-system.js"></script>
+        
+        <!-- Global Managers for User Profile, Bookmarks, and Dark Mode -->
+        <script src="../../assets/js/global-user-manager.js"></script>
+        <script src="../../assets/js/bookmark-manager.js"></script>
+        <script src="../../assets/js/dark-mode-manager.js"></script>
+        <script src="../../assets/js/footer-manager.js"></script>
+</body>
     </html>
     

@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Applications - Shortcut Sensei</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/app-search.css">
+    <script src="assets/js/api-auth-shared.js"></script>
+    <script src="assets/js/app-search.js"></script>
     
     <style>
         /* Reset and base styles */
@@ -13,12 +17,18 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
 
         body {
             font-family: 'Arial', sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
+            color: var(--text-color, #333);
+            background-color: var(--bg-color, #f8f9fa);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -27,33 +37,146 @@
             padding: 0 20px;
         }
 
-        /* Header styles */
-        .main-header {
-            background-color: #000000;
+        /* Header styles - Exact Discord match */
+        header {
+            background-color: #000;
             color: #fff;
             padding: 15px 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
-            transition: all 0.3s ease;
+        }
+        
+        body {
+            padding-top: 70px;
         }
 
-        .main-header .container {
+        .container {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            max-width: 1200px;
-            width: 100%;
+            width: 90%;
             margin: 0 auto;
-            padding: 0 40px;
-            flex-wrap: nowrap;
+        }
+
+        .logo a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.8em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .main-nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        .main-nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .main-nav ul li a:hover {
+            background-color: #444;
+        }
+        
+        .main-nav ul li a.active {
+            background-color: #8a2be2;
+        }
+
+        .search-container {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border-radius: 25px;
+            padding: 5px 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .dark-mode .search-container {
+            background-color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-container input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 16px;
+            outline: none;
+            background-color: transparent;
+            color: #333;
+            transition: color 0.3s;
+        }
+        
+        .dark-mode .search-container input[type="text"] {
+            color: #f4f4f4;
+        }
+        
+        .search-container input[type="text"]::placeholder {
+            color: #888;
+        }
+
+        .search-container button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: #8a2be2;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            outline: none;
+            transition: background-color 0.3s;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .search-container button:hover {
+            background-color: #7a1dc5;
+        }
+
+        .dark-mode-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-left: 15px;
+            position: relative;
+            user-select: none;
+        }
+        
+        .dark-mode-toggle i {
+            font-size: 24px;
+            transition: transform 0.4s ease;
+        }
+
+        .main-header .container {
+            align-items: center;
+            gap: 20px;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 50px;
+            gap: 40px;
             flex: 1;
             min-width: 0;
             padding-left: 0;
@@ -66,6 +189,11 @@
             margin-left: auto;
             flex-shrink: 0;
             padding-right: 0;
+        }
+
+        .menu-toggle {
+            align-items: center;
+            justify-content: center;
         }
 
         .logo {
@@ -112,6 +240,71 @@
         .main-nav ul li a:hover {
             background-color: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
+        }
+
+        /* Dropdown menu styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #000;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-menu li:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-menu li a {
+            padding: 12px 20px;
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+            border-radius: 0;
+        }
+
+        .dropdown-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.2);
+            margin: 8px 0;
+            border: none;
         }
 
         /* Get Started button styling */
@@ -182,56 +375,21 @@
             color: #fff;
         }
 
-        /* Search results styles */
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background-color: rgb(0, 0, 0);
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-height: 250px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            margin-top: 5px;
-        }
-
-        .search-result-item {
-            padding: 12px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.2s;
-        }
-
-        .search-result-item:hover {
-            background-color: #0f0912;
-        }
-
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
 
         /* User Menu Styles */
         .user-menu-container {
             position: relative;
-            flex-shrink: 0;
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            font-size: 24px;
+            color: var(--primary-color);
             cursor: pointer;
-            border: 2px solid #9c27b0;
-            transition: all 0.3s ease;
-            object-fit: cover;
+            transition: transform var(--transition-speed);
         }
 
         .user-avatar:hover {
-            transform: scale(1.05);
-            border-color: #7b1fa2;
+            transform: scale(1.1);
         }
 
         .user-dropdown {
@@ -244,8 +402,19 @@
             padding: 10px 0;
             min-width: 200px;
             margin-top: 10px;
-            display: none;
+            /* Hide by default, show with .show class (same as global.css) */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
             z-index: 1001;
+        }
+
+        .user-dropdown.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            display: block !important;
         }
 
         .user-dropdown::before {
@@ -304,13 +473,6 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Menu toggle for mobile */
-        .menu-toggle {
-            display: none;
-            font-size: 1.5em;
-            cursor: pointer;
-        }
-
         /* Search container styles for applications */
         .search-container {
             position: relative;
@@ -358,101 +520,416 @@
 
         /* Main content styles */
         .main-content {
-            padding: 40px 0;
+            padding: 0;
             min-height: calc(100vh - 200px);
         }
 
-        .page-title {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .page-title h1 {
-            font-size: 2.5em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .page-title p {
-            font-size: 1.2em;
-            color: #666;
-        }
-
-        /* Category styles */
-        .category-section {
-            margin-bottom: 50px;
-        }
-
-        .category-title {
-            font-size: 1.8em;
-            color: #333;
-            margin-bottom: 20px;
-            padding-left: 20px;
-            border-left: 4px solid #9c27b0;
-        }
-
-        /* Application cards */
-        .app-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 20px 0;
-        }
-
-        .app-card {
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        /* Enhanced Page Header Section */
+        .page-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px 0;
+            margin-top: 0;
+            position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(156, 39, 176, 0.1);
+        }
+
+        /* Removed purple line */
+
+        .page-header .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-header h1 {
+            font-size: 3.2em;
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .page-header p {
+            font-size: 1.4em;
+            color: #495057;
+            margin-bottom: 40px;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+
+        /* Category Slider Navigation */
+        .category-slider-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            gap: 20px;
+        }
+
+        .slider-btn {
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            border: none;
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+        }
+
+        .slider-btn:hover {
+            transform: translateY(-2px) scale(1.1);
+            box-shadow: 0 8px 25px rgba(156, 39, 176, 0.4);
+        }
+
+        .slider-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .category-indicators {
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .indicator {
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .indicator:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .indicator.active {
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+        }
+
+        /* Applications Grid Container with Sliding Animation */
+        .applications-grid {
+            padding: 20px 0;
+            background: var(--bg-color, #fff);
             position: relative;
         }
 
+        .applications-grid .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .categories-slider {
+            display: block;
+            width: 100%;
+            position: relative;
+        }
+
+        .category-section {
+            width: 100%;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-bottom: 0;
+        }
+
+        .category-section.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Show all categories by default (fallback if JS doesn't load) */
+        .categories-slider:not(.js-initialized) .category-section {
+            display: block !important;
+            opacity: 1 !important;
+        }
+
+        /* Show first category by default when JS loads */
+        .category-section:first-child {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Enhanced smooth slide animations */
+        .slide-enter {
+            animation: slideInSmooth 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .slide-leave {
+            animation: slideOutSmooth 0.6s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+
+        @keyframes slideInSmooth {
+            0% {
+                transform: translateX(60px) scale(0.98);
+                opacity: 0;
+                filter: blur(3px);
+            }
+            50% {
+                opacity: 0.7;
+                filter: blur(1px);
+            }
+            100% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+        @keyframes slideOutSmooth {
+            0% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+                filter: blur(0);
+            }
+            100% {
+                transform: translateX(-40px) scale(0.98);
+                opacity: 0;
+                filter: blur(2px);
+            }
+        }
+
+        /* Prevent any layout shifts during animation */
+        .category-section.slide-enter,
+        .category-section.slide-leave {
+            position: absolute !important;
+            width: 100% !important;
+        }
+
+        /* Enhanced header search for applications page */
+        .main-header .search-container {
+            display: flex;
+            max-width: 400px;
+        }
+
+        .main-header .search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .main-header .search-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
+        }
+
+        .main-header .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Ensure proper vertical stacking */
+        .applications-grid {
+            display: block;
+        }
+
+        .category-section {
+            display: block;
+            width: 100%;
+        }
+
+        /* Category styles - Enhanced Design */
+        .category-section {
+            margin-bottom: 70px;
+            position: relative;
+        }
+
+        .category-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            padding: 20px 0 20px 30px;
+            position: relative;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border-left: 6px solid #9c27b0;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .category-title:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.15);
+        }
+
+        .category-title::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, #9c27b0, transparent);
+        }
+
+        /* Application cards - Enhanced Design */
+        .app-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .app-card {
+            background: var(--card-bg, linear-gradient(135deg, #fff 0%, #f8f9fa 100%));
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(156, 39, 176, 0.1);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 1px solid rgba(156, 39, 176, 0.1);
+            min-height: 260px;
+            width: 100%;
+            max-width: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
         .app-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(156, 39, 176, 0.2);
+            border-color: rgba(156, 39, 176, 0.3);
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #9c27b0, #673ab7, #3f51b5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .app-card:hover::before {
+            opacity: 1;
         }
 
         .app-card a {
             text-decoration: none;
-            color: inherit;
-            display: block;
-            padding: 25px;
+            color: var(--text-color, #333);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 25px;
             height: 100%;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
 
         .app-icon-container {
-            text-align: center;
             margin-bottom: 20px;
+            position: relative;
         }
 
         .app-icon-container i {
-            font-size: 3.5em;
+            font-size: 4em;
             color: #9c27b0;
-            background-color: #f8f9fa;
-            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
             border-radius: 50%;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-icon-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 50%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.4s ease;
+        }
+
+        .app-icon-container::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .app-card:hover .app-icon-container::before {
+            opacity: 1;
         }
 
         .app-card:hover .app-icon-container i {
-            transform: scale(1.1);
-            background-color: #9c27b0;
+            transform: scale(1.1) rotate(5deg);
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
             color: #fff;
+            box-shadow: 0 10px 20px rgba(156, 39, 176, 0.3);
         }
 
         .app-info h3 {
-            font-size: 1.4em;
-            margin-bottom: 10px;
-            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            font-weight: 600;
             text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .app-card:hover .app-info h3 {
+            color: #9c27b0;
         }
 
         .app-info p {
-            color: #666;
-            font-size: 0.95em;
+            color: #6c757d;
+            font-size: 1em;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin: 0;
+            transition: color 0.3s ease;
+        }
+
+        .app-card:hover .app-info p {
+            color: #495057;
         }
 
         /* Search results */
@@ -500,37 +977,73 @@
             transform: translateY(-2px);
         }
 
-        /* Footer styles */
+        /* Footer styles - Homepage Match */
         footer {
             background-color: #000000;
-            color: #fff;
-            padding: 20px 0;
-            text-align: center;
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 0;
         }
 
         .footer-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+            color: #fff;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: #8a2be2;
+        }
+
+        .footer-column p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
         }
 
         .footer-links {
             list-style-type: none;
             margin: 0;
             padding: 0;
-            display: flex;
-            gap: 20px;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
         }
 
         .footer-links li a {
-            color: #fff;
+            color: #ccc;
             text-decoration: none;
-            font-size: 1em;
+            transition: all 0.3s;
+            display: inline-block;
         }
 
         .footer-links li a:hover {
-            text-decoration: underline;
+            color: #8a2be2;
+            transform: translateX(5px);
         }
 
         .social-icons {
@@ -538,30 +1051,39 @@
             margin: 0;
             padding: 0;
             display: flex;
-            gap: 20px;
-        }
-
-        .social-icons li {
-            display: inline;
+            gap: 15px;
         }
 
         .social-icons li a {
-            color: #fff;
+            color: #ccc;
             font-size: 1.5em;
-            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            text-decoration: none;
         }
 
         .social-icons li a:hover {
-            color: #6a1b9a;
+            color: #fff;
+            background-color: #8a2be2;
+            transform: translateY(-5px);
         }
 
         .subscribe-form {
             display: flex;
             gap: 10px;
+            max-width: 400px;
+            width: 100%;
         }
 
         .subscribe-form input[type="email"] {
-            padding: 10px;
+            flex: 1;
+            padding: 12px 15px;
             border: none;
             border-radius: 20px;
             outline: none;
@@ -569,22 +1091,27 @@
         }
 
         .subscribe-form button {
-            padding: 10px 20px;
+            padding: 12px 20px;
             border: none;
             border-radius: 20px;
-            background-color: purple;
+            background-color: #8a2be2;
             color: #fff;
             cursor: pointer;
             font-size: 1em;
             transition: background-color 0.3s;
+            white-space: nowrap;
         }
 
         .subscribe-form button:hover {
-            background-color: #6a1b9a;
+            background-color: #7a1dc5;
         }
 
-        footer p {
-            margin: 20px 0 0;
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            color: #888;
         }
 
         /* Responsive styles */
@@ -669,43 +1196,129 @@
             }
         }
 
-        /* Additional responsive styles for app grid */
+        /* Enhanced responsive styles for improved app grid */
         @media (max-width: 1200px) {
             .app-cards {
                 grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                gap: 15px;
+                gap: 20px;
+                padding: 25px 15px;
+                max-width: 1000px;
+            }
+
+            .category-title {
+                font-size: 2em;
+                padding: 15px 0 15px 25px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .app-cards {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .app-cards {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 20px;
+                padding: 20px 10px;
+            }
+
+            .app-card {
+                height: 260px;
+            }
+
+            .app-card a {
+                padding: 25px 20px;
             }
         }
 
         @media (max-width: 768px) {
-            .app-cards {
-                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-                gap: 15px;
-                padding: 15px;
+            .page-header {
+                padding: 40px 0;
             }
 
-            .page-title h1 {
-                font-size: 2em;
+            .page-header h1 {
+                font-size: 2.5em;
+            }
+
+            .page-header p {
+                font-size: 1.2em;
+                margin-bottom: 30px;
+            }
+
+            .category-slider-nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .category-indicators {
+                order: 2;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                padding: 12px 20px;
+            }
+
+            .indicator {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            .slider-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1em;
+            }
+
+            .app-cards {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 20px;
+                padding: 20px;
+                justify-items: center;
             }
 
             .app-card {
-                max-width: 400px;
-                margin: 0 auto;
+                max-width: 350px;
+                width: 100%;
+                height: 250px;
             }
 
+            .category-title {
+                font-size: 1.8em;
+                padding: 12px 0 12px 20px;
+                margin-bottom: 30px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+            
+            .footer-column h3::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
             .footer-links {
-                flex-wrap: wrap;
+                text-align: center;
+            }
+            
+            .social-icons {
                 justify-content: center;
             }
 
             .subscribe-form {
                 flex-direction: column;
-                align-items: center;
+                max-width: 100%;
             }
 
-            .subscribe-form input[type="email"] {
-                margin-bottom: 10px;
-                width: 250px;
+            .subscribe-form input[type="email"],
+            .subscribe-form button {
+                width: 100%;
             }
 
             .back-to-top {
@@ -716,40 +1329,75 @@
             }
         }
 
-        @media (max-width: 480px) {
-            .page-title h1 {
-                font-size: 1.8em;
+        @media (max-width: 576px) {
+            .page-header {
+                padding: 30px 0;
             }
 
-            .page-title p {
-                font-size: 1em;
+            .page-header h1 {
+                font-size: 2.2em;
+            }
+
+            .page-header p {
+                font-size: 1.1em;
                 padding: 0 10px;
+                margin-bottom: 25px;
             }
 
-            .category-title {
-                font-size: 1.5em;
-                padding-left: 15px;
+            .category-slider-nav {
+                gap: 10px;
+            }
+
+            .category-indicators {
+                padding: 10px 15px;
+                gap: 8px;
+            }
+
+            .indicator {
+                padding: 5px 10px;
+                font-size: 0.75em;
+            }
+
+            .slider-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
             }
 
             .app-cards {
-                padding: 10px 5px;
-            }
-
-            .app-card a {
-                padding: 20px;
-            }
-
-            .app-icon-container i {
-                font-size: 3em;
+                grid-template-columns: 1fr;
+                gap: 15px;
                 padding: 15px;
             }
 
+            .app-card {
+                max-width: 320px;
+                height: 240px;
+                margin: 0 auto;
+            }
+
+            .category-title {
+                font-size: 1.6em;
+                padding: 10px 0 10px 15px;
+                margin-bottom: 25px;
+            }
+
+            .app-card a {
+                padding: 20px 15px;
+            }
+
+            .app-icon-container i {
+                font-size: 3.2em;
+                padding: 20px;
+            }
+
             .app-info h3 {
-                font-size: 1.2em;
+                font-size: 1.3em;
+                margin-bottom: 8px;
             }
 
             .app-info p {
-                font-size: 0.9em;
+                font-size: 0.95em;
             }
 
             .footer-links {
@@ -771,67 +1419,301 @@
                 padding: 8px 16px;
             }
         }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Login Button Styles */
+        .login-button-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #7b1fa2, #4a148c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Dark mode styles */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --card-bg: #1e1e1e;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .page-header {
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .app-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .category-title {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .applications-grid {
+            background: var(--bg-color);
+        }
+
+        /* Responsive header for mobile */
+        @media (max-width: 768px) {
+            header .container {
+                flex-wrap: wrap;
+                padding: 10px 15px;
+            }
+            
+            .logo {
+                order: 1;
+                flex: 1;
+            }
+            
+            .logo a {
+                font-size: 1.5em;
+            }
+            
+            .menu-toggle {
+                display: block !important;
+                order: 2;
+                margin-left: auto;
+                cursor: pointer;
+                padding: 10px;
+                color: #fff;
+                font-size: 1.5em;
+                background: none;
+                border: none;
+            }
+            
+            .main-nav {
+                order: 4;
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .main-nav ul {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                padding: 10px 0;
+                z-index: 1000;
+                gap: 0;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+            
+            .main-nav ul.show {
+                display: flex !important;
+            }
+            
+            .main-nav ul li {
+                width: 100%;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .main-nav ul li:last-child {
+                border-bottom: none;
+            }
+            
+            .main-nav ul li a {
+                padding: 15px 20px;
+                width: 100%;
+                text-align: left;
+                border-radius: 0;
+            }
+            
+            .search-container {
+                order: 3;
+                max-width: 200px;
+                margin-left: 10px;
+            }
+            
+            .search-container input {
+                width: 120px;
+                font-size: 14px;
+            }
+            
+            .dark-mode-toggle {
+                order: 5;
+                margin-left: 10px;
+            }
+            
+            .user-menu-container,
+            .login-button-container {
+                order: 6;
+                margin-left: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo a {
+                font-size: 1.3em;
+            }
+            
+            .search-container {
+                max-width: 150px;
+            }
+            
+            .search-container input {
+                width: 80px;
+            }
+        }
     </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="container">
-            <div class="header-left">
-                <div class="logo">
-                    <a href="home-page.html">Shortcut Sensei</a>
-                </div>
-                
-                <nav class="main-nav" id="mainNav">
-                    <ul>
-                        <li><a href="pages/blogs/blogs.html">Blogs</a></li>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#testimonials">Testimonials</a></li>
-                        <li><a href="About.html">About</a></li>
-                        <li class="get-started"><a href="quizs/quiz.html">Quizes</a></li>
-                    </ul>
-                </nav>
+
+<header class="main-header">
+    <div class="container">
+        <div class="header-left">
+            <div class="logo">
+                <a href="home-page.html">Shortcut Sensei</a>
+            </div>
+            
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="pages/blogs/blogs.html">Blogs</a></li>
+                    <li><a href="About.html">About</a></li>
+                    <li><a href="/quizs/">Quiz</a></li>
+                    <li><a href="https://www.linkedin.com/in/rafi-s-b-m-a3492a265/" target="_blank" rel="noopener noreferrer">Follow Us</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+
+        <div class="header-right">
+            <div class="search-container">
+                <input type="text" placeholder="Search new.." id="app" aria-label="Search applications">
+                <button type="button" id="btn" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+                <div id="appResults" class="app-search-results"></div>
             </div>
 
-            <div class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
-                <i class="fa-solid fa-bars"></i>
+            <div class="dark-mode-toggle" id="darkModeToggle">
+                <i class="fa-solid fa-moon"></i>
+                <i class="fa-solid fa-sun" style="display: none;"></i>
             </div>
 
-            <div class="header-right">
-                <div class="search-container">
-                    <input type="text" placeholder="Search new.." id="app" aria-label="Search applications">
-                    <button type="button" id="btn" aria-label="Search">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <div id="searchResults" class="search-results"></div>
+            <!-- User Menu -->
+            <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+                <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
+                <div class="user-dropdown" id="userDropdownMenu">
+                    <a href="/quizs/?profile=true"><i class="fas fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
+            </div>
 
-                <!-- User Menu -->
-                <div class="user-menu-container" id="userMenuContainer">
-                    <img src="https://via.placeholder.com/40/8B5FBF/FFFFFF?text=U" alt="" class="user-avatar" id="headerAvatar" onclick="toggleUserMenu()">
-                    <div class="user-dropdown" id="userDropdownMenu">
-                        <a href="pages/user/user_profile.htm"><i class="fas fa-user"></i> My Profile</a>
-                        <a href="pages/user/settings.html"><i class="fas fa-cog"></i> Settings</a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <!-- Login Button for non-authenticated users -->
+            <div class="login-button-container" id="loginButtonContainer">
+                <button class="login-btn" onclick="window.location.href='pages/user/login_page.html'">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <main class="main-content">
+        <!-- Dedicated Page Header Section -->
+        <section class="page-header">
+            <div class="container">
+                <div class="header-content">
+                    <h1><i class="fas fa-th-large"></i> All Applications</h1>
+                    <p>Explore keyboard shortcuts for your favorite software and operating systems.</p>
+                    
+                    <!-- Category Navigation Slider -->
+                    <div class="category-slider-nav">
+                        <button class="slider-btn prev-btn" id="prevBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="category-indicators" id="categoryIndicators">
+                            <span class="indicator active" data-category="operating-systems">OS</span>
+                            <span class="indicator" data-category="microsoft-office">Office</span>
+                            <span class="indicator" data-category="web-browsers">Browsers</span>
+                            <span class="indicator" data-category="design-creativity">Design</span>
+                            <span class="indicator" data-category="development">Dev</span>
+                            <span class="indicator" data-category="communication">Chat</span>
+                            <span class="indicator" data-category="productivity">Tools</span>
+                        </div>
+                        <button class="slider-btn next-btn" id="nextBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </section>
 
-    <main class="main-content">
-        <div class="container">
-            <div class="page-title">
-                <h1><i class="fas fa-th-large"></i> All Applications</h1>
-                <p>Explore keyboard shortcuts for your favorite software and operating systems.</p>
-            </div>
+        <!-- Applications Grid Container -->
+        <div class="applications-grid">
+            <div class="container">
+                <div class="no-results" id="noResults">
+                    <i class="fas fa-search-minus"></i>
+                    <p>No applications found matching your search.</p>
+                </div>
 
-            <div class="no-results" id="noResults">
-                <i class="fas fa-search-minus"></i>
-                <p>No applications found matching your search.</p>
-            </div>
-
-            <!-- Operating Systems -->
+                <!-- Categories Slider Container -->
+                <div class="categories-slider" id="categoriesSlider">
+                    <!-- Operating Systems -->
             <div class="category-section" data-category="operating-systems">
                 <h2 class="category-title">Operating Systems</h2>
                 <div class="app-cards">
@@ -847,7 +1729,7 @@
                         </a>
                     </div>
                     <div class="app-card" data-name="macos">
-                        <a href="#" aria-label="View shortcuts for macOS">
+                        <a href="pages/applications/Mac_Shortcuts.html" aria-label="View shortcuts for macOS">
                             <div class="app-icon-container">
                                 <i class="fab fa-apple"></i>
                             </div>
@@ -865,7 +1747,7 @@
                 <h2 class="category-title">Microsoft Office Suite</h2>
                 <div class="app-cards">
                     <div class="app-card" data-name="microsoft excel">
-                        <a href="pages/applications/Microsoft Excell.htm" aria-label="View shortcuts for Microsoft Excel">
+                        <a href="pages/applications/Microsoft Excell.html" aria-label="View shortcuts for Microsoft Excel">
                             <div class="app-icon-container">
                                 <i class="fas fa-file-excel"></i>
                             </div>
@@ -876,7 +1758,7 @@
                         </a>
                     </div>
                     <div class="app-card" data-name="microsoft word">
-                        <a href="pages/applications/Microsoft Word.htm" aria-label="View shortcuts for Microsoft Word">
+                        <a href="pages/applications/Microsoft Word.html" aria-label="View shortcuts for Microsoft Word">
                             <div class="app-icon-container">
                                 <i class="fas fa-file-word"></i>
                             </div>
@@ -887,7 +1769,7 @@
                         </a>
                     </div>
                     <div class="app-card" data-name="microsoft powerpoint">
-                        <a href="pages/applications/Microsoft PowerPoint.htm" aria-label="View shortcuts for Microsoft PowerPoint">
+                        <a href="pages/applications/Microsoft PowerPoint.html" aria-label="View shortcuts for Microsoft PowerPoint">
                             <div class="app-icon-container">
                                 <i class="fas fa-file-powerpoint"></i>
                             </div>
@@ -1009,22 +1891,11 @@
                     <div class="app-card" data-name="visual studio">
                         <a href="pages/applications/Visual Studio.html" aria-label="View shortcuts for Visual Studio">
                             <div class="app-icon-container">
-                                <i class="fab fa-vs-code"></i>
+                                <i class="fas fa-code" style="color: #68217a;"></i>
                             </div>
                             <div class="app-info">
                                 <h3>Visual Studio</h3>
-                                <p>Code faster and smarter with Visual Studio Code shortcuts.</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="app-card" data-name="html cheat sheet">
-                        <a href="pages/applications/Html Cheat Sheet.html" aria-label="View HTML cheat sheet shortcuts">
-                            <div class="app-icon-container">
-                                <i class="fas fa-code"></i>
-                            </div>
-                            <div class="app-info">
-                                <h3>HTML Cheat Sheet</h3>
-                                <p>Quick HTML reference and shortcuts.</p>
+                                <p>Code faster and smarter with Visual Studio shortcuts.</p>
                             </div>
                         </a>
                     </div>
@@ -1209,29 +2080,46 @@
                     </div>
                 </div>
             </div>
-        </div>
+                </div> <!-- Close categories-slider -->
+            </div> <!-- Close applications-grid container -->
+        </div> <!-- Close applications-grid -->
     </main>
 
     <footer>
         <div class="footer-content">
-            <ul class="footer-links">
-                <li><a href="home-page.html">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="About.html">About</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="#news">Latest News</a></li>
-            </ul>
-            <ul class="social-icons">
-                <li><a href="https://www.facebook.com/profile.php?id=100015198880002"><i class="fab fa-facebook-f"></i></a></li>
-                <li><a href="https://twitter.com/RAFI09925204"><i class="fab fa-twitter"></i></a></li>
-                <li><a href="https://www.linkedin.com/in/rafi-s-b-m-a3492a265/"><i class="fab fa-linkedin-in"></i></a></li>
-                <li><a href="https://www.instagram.com/rafi_s_b_m/"><i class="fab fa-instagram"></i></a></li>
-            </ul>
-            <div class="subscribe-form">
-                <input id="emailInput" type="email" placeholder="Subscribe to our newsletter">
-                <button id="subscribeButton" type="button">Subscribe</button>
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <p>Your ultimate guide to mastering keyboard shortcuts. We provide comprehensive guides and tips to help you work faster and more efficiently.</p>
             </div>
-            <p id="confirmationMessage" style="display: none;">Thank you for subscribing to our newsletter!</p>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="home-page.html">Home</a></li>
+                    <li><a href="home-page.html#features">Features</a></li>
+                    <li><a href="home-page.html#testimonials">Testimonials</a></li>
+                    <li><a href="About.html">About</a></li>
+                    <li><a href="Privacy.html">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <ul class="social-icons">
+                    <li><a href="https://www.facebook.com/profile.php?id=100015198880002"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://twitter.com/RAFI09925204"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="https://www.linkedin.com/in/rafi-s-b-m-a3492a265/"><i class="fab fa-linkedin"></i></a></li>
+                    <li><a href="https://www.instagram.com/rafi_s_b_m/"><i class="fab fa-instagram"></i></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Subscribe</h3>
+                <form class="subscribe-form" id="subscribeForm">
+                    <input type="email" id="emailInput" placeholder="Your email" required>
+                    <button type="submit" id="subscribeButton">Subscribe</button>
+                </form>
+                <p id="confirmationMessage" style="display: none; color: #8a2be2; font-weight: bold; margin-top: 10px;">Thanks for subscribing to our newsletter!</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
             <p>&copy; 2024 Shortcut Sensei. All rights reserved.</p>
         </div>
     </footer>
@@ -1243,6 +2131,31 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Newsletter subscription handler
+            const subscribeForm = document.getElementById('subscribeForm');
+            const emailInput = document.getElementById('emailInput');
+            const confirmationMessage = document.getElementById('confirmationMessage');
+            
+            if (subscribeForm) {
+                subscribeForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = emailInput.value.trim();
+                    
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        subscribeForm.style.display = 'none';
+                        confirmationMessage.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            subscribeForm.style.display = 'flex';
+                            confirmationMessage.style.display = 'none';
+                            emailInput.value = '';
+                        }, 5000);
+                    } else {
+                        alert('Please enter a valid email address.');
+                    }
+                });
+            }
+            
             // Menu toggle functionality
             const menuToggle = document.getElementById('menuToggle');
             const mainNav = document.getElementById('mainNav');
@@ -1290,71 +2203,163 @@
                 }
             }
 
-            // Live search functionality
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            const appCards = document.querySelectorAll('.app-card');
-            const categoryCards = document.querySelectorAll('.category-section');
-            const noResults = document.getElementById('noResults');
-
-            function performSearch() {
-                const query = searchInput.value.trim().toLowerCase();
-                let hasResults = false;
-
-                if (query === '') {
-                    // Show all cards and categories
-                    appCards.forEach(card => {
-                        card.style.display = 'block';
+            // Dropdown menu functionality for mobile
+            const dropdowns = document.querySelectorAll('.dropdown');
+            dropdowns.forEach(dropdown => {
+                const toggle = dropdown.querySelector('.dropdown-toggle');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                
+                if (toggle && menu) {
+                    toggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        // Close other dropdowns
+                        document.querySelectorAll('.dropdown-menu').forEach(otherMenu => {
+                            if (otherMenu !== menu) {
+                                otherMenu.classList.remove('active');
+                            }
+                        });
+                        // Toggle current dropdown
+                        menu.classList.toggle('active');
                     });
-                    categoryCards.forEach(category => {
-                        category.style.display = 'block';
-                    });
-                    noResults.style.display = 'none';
-                    return;
                 }
+            });
 
-                // Hide all categories first
-                categoryCards.forEach(category => {
-                    category.style.display = 'none';
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        menu.classList.remove('active');
+                    });
+                }
+            });
+
+            // Category Slider Functionality
+            const categoriesSlider = document.getElementById('categoriesSlider');
+            const categoryIndicators = document.querySelectorAll('.indicator');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const categoryElements = document.querySelectorAll('.category-section');
+            
+            let currentCategoryIndex = 0;
+            const totalCategories = categoryElements.length;
+            
+            console.log('Found categories:', totalCategories, categoryElements);
+            
+            // Mark slider as initialized
+            categoriesSlider.classList.add('js-initialized');
+            
+            // Hide all categories first and initialize
+            categoryElements.forEach((cat, index) => {
+                cat.style.display = 'none';
+                cat.classList.remove('active');
+                if (index === 0) {
+                    cat.style.display = 'block';
+                    cat.classList.add('active');
+                    if (categoryIndicators[0]) categoryIndicators[0].classList.add('active');
+                }
+            });
+            
+            function updateSlider(direction = 'next') {
+                console.log('Switching to category:', currentCategoryIndex);
+                
+                // Hide all categories
+                categoryElements.forEach((cat, index) => {
+                    cat.style.display = 'none';
+                    cat.classList.remove('active');
                 });
-
-                // Search through cards
-                appCards.forEach(card => {
-                    const appName = card.getAttribute('data-name').toLowerCase();
-                    const category = card.closest('.category-section');
-                    
-                    if (appName.includes(query)) {
-                        card.style.display = 'block';
-                        category.style.display = 'block';
-                        hasResults = true;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-
-                // Hide categories with no visible cards
-                categoryCards.forEach(category => {
-                    const visibleCards = category.querySelectorAll('.app-card[style*="block"]');
-                    if (visibleCards.length === 0) {
-                        category.style.display = 'none';
-                    }
-                });
-
-                // Show/hide no results message
-                noResults.style.display = hasResults ? 'none' : 'block';
+                
+                // Remove active from all indicators
+                categoryIndicators.forEach(ind => ind.classList.remove('active'));
+                
+                // Show current category
+                if (categoryElements[currentCategoryIndex]) {
+                    categoryElements[currentCategoryIndex].style.display = 'block';
+                    categoryElements[currentCategoryIndex].classList.add('active');
+                }
+                
+                // Activate current indicator
+                if (categoryIndicators[currentCategoryIndex]) {
+                    categoryIndicators[currentCategoryIndex].classList.add('active');
+                }
+                
+                // Update button states
+                prevBtn.disabled = currentCategoryIndex === 0;
+                nextBtn.disabled = currentCategoryIndex === totalCategories - 1;
             }
-
-            if (searchInput) {
-                searchInput.addEventListener('input', performSearch);
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        performSearch();
-                    }
-                });
+            
+            function goToCategory(index) {
+                if (index >= 0 && index < totalCategories && index !== currentCategoryIndex) {
+                    const direction = index > currentCategoryIndex ? 'next' : 'prev';
+                    currentCategoryIndex = index;
+                    updateSlider(direction);
+                }
             }
+            
+            // Navigation button event listeners
+            prevBtn.addEventListener('click', () => {
+                if (currentCategoryIndex > 0) {
+                    currentCategoryIndex--;
+                    updateSlider('prev');
+                }
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                if (currentCategoryIndex < totalCategories - 1) {
+                    currentCategoryIndex++;
+                    updateSlider('next');
+                }
+            });
+            
+            // Category indicator click handlers
+            categoryIndicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    goToCategory(index);
+                });
+            });
+            
+            // Initialize button states
+            prevBtn.disabled = true;
+            nextBtn.disabled = totalCategories <= 1;
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' && currentCategoryIndex > 0) {
+                    currentCategoryIndex--;
+                    updateSlider('prev');
+                } else if (e.key === 'ArrowRight' && currentCategoryIndex < totalCategories - 1) {
+                    currentCategoryIndex++;
+                    updateSlider('next');
+                }
+            });
 
-            if (searchButton) {
-                searchButton.addEventListener('click', performSearch);
+            // Touch/Swipe support for mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            categoriesSlider.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            categoriesSlider.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0 && currentCategoryIndex < totalCategories - 1) {
+                        // Swipe left - go to next category
+                        currentCategoryIndex++;
+                        updateSlider('next');
+                    } else if (diff < 0 && currentCategoryIndex > 0) {
+                        // Swipe right - go to previous category
+                        currentCategoryIndex--;
+                        updateSlider('prev');
+                    }
+                }
             }
 
             // Back to top functionality
@@ -1386,128 +2391,20 @@
                 return emailRegex.test(email);
             }
 
-            function subscribe() {
-                const emailInput = document.getElementById('emailInput');
-                const confirmationMessage = document.getElementById('confirmationMessage');
-                const email = emailInput.value.trim();
 
-                if (email === '') {
-                    alert('Please enter your email address.');
-                    return;
-                }
-
-                if (!isValidEmail(email)) {
-                    alert('Please enter a valid email address.');
-                    return;
-                }
-
-                // Here you can add code to send the email to your server
-                console.log('Subscribed email:', email);
-
-                // Show confirmation message
-                confirmationMessage.style.display = 'block';
-                emailInput.value = '';
-
-                // Hide confirmation message after 3 seconds
-                setTimeout(function() {
-                    confirmationMessage.style.display = 'none';
-                }, 3000);
-            }
-
-            // Add event listener for subscription
-            const subscribeButton = document.getElementById('subscribeButton');
-            if (subscribeButton) {
-                subscribeButton.addEventListener('click', subscribe);
-            }
-
-            const emailInput = document.getElementById('emailInput');
-            if (emailInput) {
-                emailInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        subscribe();
-                    }
-                });
-            }
         });
 
-        // Firebase Authentication and User Menu functionality
-        // Toggle user menu
-        window.toggleUserMenu = function() {
-            const menu = document.getElementById('userDropdownMenu');
-            if (menu) {
-                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-            }
-        };
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            const userMenu = document.getElementById('userMenuContainer');
-            const dropdown = document.getElementById('userDropdownMenu');
-            if (userMenu && dropdown && !userMenu.contains(e.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
 
-        // Logout function
-        window.logout = async function() {
-            try {
-                // Clear any stored user data
-                localStorage.removeItem('userAvatarImage');
-                alert('Successfully logged out!');
-                window.location.href = 'login_page_firebase.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-                alert('Failed to logout. Please try again.');
-            }
-        };
+        // Additional page-specific functionality can be added here
+        // Shared auth scripts handle authentication
     </script>
-
-    <!-- Firebase Authentication Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyA9FmWlWXqswDprmvaILZQnamrjBCsfgVs",
-            authDomain: "shortcut-sensei-1305f.firebaseapp.com",
-            projectId: "shortcut-sensei-1305f",
-            storageBucket: "shortcut-sensei-1305f.firebasestorage.app",
-            messagingSenderId: "598536091157",
-            appId: "1:598536091157:web:eff79326d42c5bba8e001c",
-            measurementId: "G-WZCS73D2W5"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        // Check authentication state and update UI
-        onAuthStateChanged(auth, (user) => {
-            const userMenuContainer = document.getElementById('userMenuContainer');
-            
-            if (user && user.emailVerified) {
-                // User is authenticated, show user menu
-                if (userMenuContainer) {
-                    userMenuContainer.style.display = 'block';
-                    updateUserProfile(user);
-                }
-            } else {
-                // User not authenticated, hide user menu
-                if (userMenuContainer) {
-                    userMenuContainer.style.display = 'none';
-                }
-            }
-        });
-        
-        // Update user profile data
-        function updateUserProfile(user) {
-            const headerAvatar = document.getElementById('headerAvatar');
-            if (headerAvatar) {
-                // Check for saved avatar first, then Firebase photo, then default
-                const savedAvatar = localStorage.getItem('userAvatarImage');
-                const avatar = savedAvatar || user.photoURL || 'https://via.placeholder.com/40/8B5FBF/FFFFFF?text=' + (user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U');
-                headerAvatar.src = avatar;
-            }
-        }
-    </script>
+    <script src="assets/js/unified-system.js"></script>
+    
+    <!-- Global Managers for User Profile, Bookmarks, and Dark Mode -->
+    <script src="assets/js/global-user-manager.js"></script>
+    <script src="assets/js/bookmark-manager.js"></script>
+    <script src="assets/js/dark-mode-manager.js"></script>
+    <script src="assets/js/footer-manager.js"></script>
 </body>
 </html>

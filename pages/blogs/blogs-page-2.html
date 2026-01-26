@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productivity Tips - Page 2 - Shortcut Sensei</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    
+    <!-- API-based Authentication -->
+    <script src="../../assets/js/api-auth.js" type="module"></script>
+
     <style>
         /* Base styles with CSS variables for easier theming */
         :root {
@@ -49,87 +54,75 @@
             background-color: var(--selection-color);
         }
         
-        /* Header styles - sticky with shadow */
+        /* Header styles - matching homepage */
         header {
-            background-color: var(--header-footer-bg);
+            background-color: #000000;
             color: #fff;
             padding: 15px 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             position: sticky;
             top: 0;
             z-index: 1000;
+            transition: all 0.3s ease;
         }
-
-        .container {
+        header .container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             width: 90%;
             margin: 0 auto;
+            gap: 0;
         }
-
         .logo a {
             color: #fff;
             text-decoration: none;
             font-size: 1.8em;
             font-weight: bold;
-            display: flex;
-            align-items: center;
+            transition: color 0.3s;
         }
-        
-        .logo-icon {
-            margin-right: 10px;
-            color: var(--primary-color);
+        .logo a:hover {
+            color: #9c27b0;
         }
-
+        .logo { margin: 0; margin-right: 60px; flex-shrink: 0; }
+        .main-nav { margin: 0; margin-right: 30px; flex-shrink: 0; }
         .main-nav ul {
             list-style-type: none;
             margin: 0;
             padding: 0;
             display: flex;
-            gap: 20px;
+            gap: 15px;
+            align-items: center;
         }
-
+        .main-nav ul li {
+            position: relative;
+        }
         .main-nav ul li a {
             color: #fff;
             text-decoration: none;
             padding: 10px 15px;
             display: block;
-            transition: all var(--transition-speed) ease;
-            border-radius: var(--border-radius);
+            transition: all 0.3s;
+            border-radius: 4px;
         }
-
-        .main-nav ul li a:hover,
-        .main-nav ul li a.active {
-            background-color: var(--primary-color);
+        .main-nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
-
-        .utility-icons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .utility-icons a {
+        .menu-toggle {
+            display: none;
+            font-size: 1.8em;
+            cursor: pointer;
             color: #fff;
-            font-size: 1.2em;
-            transition: color var(--transition-speed) ease;
-        }
-
-        .utility-icons a:hover {
-            color: var(--primary-color);
-        }
-
-        .theme-toggle {
             background: none;
             border: none;
-            color: #fff;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: color var(--transition-speed) ease;
         }
-
-        .theme-toggle:hover {
-            color: var(--primary-color);
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: 0;
+            flex-shrink: 0;
+            min-width: 0;
         }
 
         .search-container {
@@ -139,16 +132,13 @@
             background-color: #fff;
             border-radius: 25px;
             padding: 5px 15px;
-            box-shadow: var(--shadow-light);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             position: relative;
-            transition: all var(--transition-speed);
+            transition: all 0.3s;
+            max-width: 200px;
+            min-width: 150px;
+            margin: 0;
         }
-        
-        .dark-mode .search-container {
-            background-color: #333;
-            box-shadow: var(--shadow-dark);
-        }
-
         .search-container input[type="text"] {
             flex: 1;
             padding: 8px;
@@ -158,65 +148,199 @@
             font-size: 16px;
             outline: none;
             background-color: transparent;
-            color: var(--light-text);
-            transition: color var(--transition-speed);
+            color: #333;
+            transition: color 0.3s;
         }
-        
-        .dark-mode .search-container input[type="text"] {
-            color: var(--dark-text);
-        }
-        
         .search-container input[type="text"]::placeholder {
             color: #888;
         }
-
         .search-container button {
             padding: 8px 15px;
             border: none;
             border-radius: 20px;
-            background-color: var(--secondary-color);
+            background-color: #8a2be2;
             color: #fff;
             cursor: pointer;
             font-size: 16px;
             outline: none;
-            transition: background-color var(--transition-speed);
+            transition: background-color 0.3s;
             position: absolute;
             right: 5px;
             top: 50%;
             transform: translateY(-50%);
         }
-        
         .search-container button:hover {
-            background-color: var(--secondary-hover);
+            background-color: #7a1dc5;
         }
         
-        .dark-mode-toggle {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin-left: 15px;
-            position: relative;
-            user-select: none;
-        }
-        
-        .dark-mode-toggle i {
-            font-size: 24px;
-            transition: transform 0.4s ease;
+        /* Search Results Dropdown */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #1a1a1a;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            margin-top: 5px;
         }
 
-        .menu-toggle {
-            display: none;
-            font-size: 1.8em;
+        .search-result-item {
+            padding: 12px 15px;
             cursor: pointer;
+            border-bottom: 1px solid #333;
+            transition: background-color 0.2s;
             color: #fff;
         }
 
-        /* Main content styles */
-        main {
+        .search-result-item:hover {
+            background-color: #2a2a2a;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Dark mode toggle - from page 4 */
+        .dark-mode-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode-toggle i {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover i {
+            transform: scale(1.1);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            color: #f4f4f4;
+        }
+
+        body.dark-mode .dark-mode-toggle:hover {
+            background-color: rgba(244, 244, 244, 0.1);
+        }
+
+        /* User menu */
+        .user-menu-container {
+            position: relative;
+        }
+
+        .user-avatar {
+            font-size: 36px;
+            line-height: 1;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform var(--transition-speed);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .user-dropdown a i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 5px 0;
+        }
+
+        .login-button-container {
+            flex-shrink: 0;
+            margin: 0;
+            min-width: fit-content;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #7b1fa2, #4a148c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+        }
+
+        /* Blog page styles */
+        .blog-main {
             max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
-            min-height: calc(100vh - 200px);
         }
 
         .page-header {
@@ -225,118 +349,107 @@
         }
 
         .page-title {
-            font-size: 2.8em;
-            margin-bottom: 15px;
+            font-size: 3rem;
+            font-weight: bold;
             color: var(--primary-color);
-            font-weight: 700;
+            margin-bottom: 10px;
         }
 
         .page-subtitle {
-            font-size: 1.2em;
+            font-size: 1.2rem;
             color: #666;
-            margin-bottom: 30px;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        body.dark-mode .page-subtitle {
-            color: #aaa;
+        .dark-mode .page-subtitle {
+            color: #ccc;
         }
 
-        /* Filter and search styles */
-        .filter-section {
-            margin-bottom: 40px;
+        /* Blog filters and search */
+        .blog-filters {
             display: flex;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
             gap: 20px;
-            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-dropdown {
+            position: relative;
+        }
+
+        .filter-dropdown select {
+            background-color: var(--light-card);
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 10px 40px 10px 15px;
+            font-size: 16px;
+            color: var(--light-text);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+        }
+
+        .dark-mode .filter-dropdown select {
+            background-color: var(--dark-card);
+            border-color: #555;
+            color: var(--dark-text);
+        }
+
+        .blog-search {
+            position: relative;
+            display: flex;
             align-items: center;
         }
 
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            flex: 1;
-            max-width: 400px;
+        .blog-search i {
+            position: absolute;
+            left: 15px;
+            color: #666;
+            z-index: 1;
         }
 
-        .search-input {
-            flex: 1;
-            padding: 12px 16px;
+        .blog-search input {
+            padding: 10px 15px 10px 45px;
             border: 2px solid #ddd;
             border-radius: var(--border-radius);
             font-size: 16px;
-            transition: border-color var(--transition-speed);
+            width: 300px;
             background-color: var(--light-card);
             color: var(--light-text);
         }
 
-        body.dark-mode .search-input {
+        .dark-mode .blog-search input {
             background-color: var(--dark-card);
+            border-color: #555;
             color: var(--dark-text);
-            border-color: #444;
         }
 
-        .search-input:focus {
+        .blog-search input:focus {
             outline: none;
             border-color: var(--primary-color);
         }
 
-        .search-btn {
-            padding: 12px 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: background-color var(--transition-speed);
-            font-size: 16px;
-        }
-
-        .search-btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .category-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all var(--transition-speed);
-            font-size: 14px;
-        }
-
-        .filter-btn:hover,
-        .filter-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        /* Blog grid styles */
+        /* Blog grid */
         .blog-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
 
         .blog-card {
             background-color: var(--light-card);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
             overflow: hidden;
+            box-shadow: var(--shadow-light);
             transition: all var(--transition-speed) ease;
-        }
-
-        body.dark-mode .blog-card {
-            background-color: var(--dark-card);
-            box-shadow: var(--shadow-dark);
+            border: 1px solid #e0e0e0;
         }
 
         .blog-card:hover {
@@ -344,7 +457,13 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
-        body.dark-mode .blog-card:hover {
+        .dark-mode .blog-card {
+            background-color: var(--dark-card);
+            border-color: #444;
+            box-shadow: var(--shadow-dark);
+        }
+
+        .dark-mode .blog-card:hover {
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
         }
 
@@ -352,7 +471,7 @@
             width: 100%;
             height: 200px;
             object-fit: cover;
-            transition: transform var(--transition-speed);
+            transition: transform var(--transition-speed) ease;
         }
 
         .blog-card:hover .blog-image {
@@ -368,106 +487,107 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        body.dark-mode .blog-meta {
-            color: #aaa;
+            font-size: 0.9rem;
         }
 
         .blog-category {
             background-color: var(--primary-color);
             color: white;
             padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            font-weight: 600;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.8rem;
         }
 
         .blog-title {
-            font-size: 1.4em;
+            font-size: 1.3rem;
+            font-weight: bold;
             margin-bottom: 12px;
-            color: var(--light-text);
-            font-weight: 600;
             line-height: 1.3;
+            color: var(--light-text);
         }
 
-        body.dark-mode .blog-title {
+        .dark-mode .blog-title {
             color: var(--dark-text);
         }
 
         .blog-excerpt {
             color: #666;
             margin-bottom: 20px;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
-        body.dark-mode .blog-excerpt {
-            color: #ccc;
+        .dark-mode .blog-excerpt {
+            color: #bbb;
         }
 
         .blog-read-more {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
             color: var(--primary-color);
             text-decoration: none;
             font-weight: 600;
-            transition: color var(--transition-speed);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-speed) ease;
         }
 
         .blog-read-more:hover {
             color: var(--primary-hover);
+            gap: 12px;
         }
 
-        .blog-read-more i {
-            transition: transform var(--transition-speed);
-        }
-
-        .blog-read-more:hover i {
-            transform: translateX(5px);
-        }
-
-        /* Pagination styles */
-        .pagination {
+        /* Pagination */
+        .blog-pagination {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 10px;
-            margin-top: 40px;
+            margin: 40px 0;
         }
 
-        .pagination a,
-        .pagination span {
-            padding: 12px 16px;
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
             background-color: var(--light-card);
             color: var(--light-text);
             text-decoration: none;
             border-radius: var(--border-radius);
-            border: 2px solid #ddd;
-            transition: all var(--transition-speed);
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            min-width: 45px;
         }
 
-        body.dark-mode .pagination a,
-        body.dark-mode .pagination span {
+        .dark-mode .pagination-btn {
             background-color: var(--dark-card);
+            border-color: #555;
             color: var(--dark-text);
-            border-color: #444;
         }
 
-        .pagination a:hover {
+        .pagination-btn:hover {
             background-color: var(--primary-color);
+            border-color: var(--primary-color);
             color: white;
+        }
+
+        .dark-mode .pagination-btn:hover {
+            background-color: var(--primary-color);
             border-color: var(--primary-color);
         }
 
-        .pagination .current {
+        .pagination-btn.active {
             background-color: var(--primary-color);
-            color: white;
             border-color: var(--primary-color);
+            color: white;
         }
 
-        /* Newsletter section */
+        .pagination-btn.active:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /*  */
         .newsletter-section {
             background-color: var(--light-card);
             border-radius: var(--border-radius);
@@ -539,316 +659,469 @@
             background-color: var(--secondary-hover);
         }
 
-        /* Footer styles */
+        /* Footer */
         footer {
             background-color: var(--header-footer-bg);
-            color: #fff;
-            text-align: center;
-            padding: 40px 20px;
+            color: white;
+            padding: 40px 0 20px;
             margin-top: 60px;
         }
 
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
-
-        .social-links {
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
             margin-bottom: 20px;
         }
-
-        .social-links a {
-            color: #fff;
-            font-size: 1.5em;
-            margin: 0 15px;
-            transition: color var(--transition-speed) ease;
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--primary-color);
         }
 
-        .social-links a:hover {
-            color: var(--primary-color);
+        .footer-column p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .footer-links, .social-icons {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links li a, .social-icons li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: all var(--transition-speed);
+            display: inline-block;
+        }
+
+        .footer-links li a:hover {
+            color: #8a2be2;
+            transform: translateX(5px);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-icons li a {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all var(--transition-speed);
+        }
+
+        .social-icons li a:hover {
+            color: #fff;
+            background-color: #8a2be2;
+            transform: translateY(-5px);
+        }
+
+        .subscribe-form {
+            display: flex;
+            gap: 10px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .subscribe-form input[type="email"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 1em;
+        }
+
+        .subscribe-form button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--secondary-color);
+            color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color var(--transition-speed);
+            white-space: nowrap;
+        }
+
+        .subscribe-form button:hover {
+            background-color: #7a1dc5;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            color: #888;
         }
 
         /* Responsive design */
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .main-nav ul {
-                flex-direction: column;
-                gap: 10px;
-                width: 100%;
-            }
-
-            .utility-icons {
-                order: -1;
-            }
-
             .page-title {
-                font-size: 2.2em;
+                font-size: 2.5rem;
             }
 
-            .filter-section {
+            .blog-filters {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .search-bar {
-                max-width: none;
+            .blog-search input {
+                width: 100%;
             }
 
-            .blog-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+            .newsletter-form {
+                flex-direction: column;
             }
 
-            .pagination {
-                flex-wrap: wrap;
-                gap: 5px;
-            }
-
-            .pagination a,
-            .pagination span {
+            .pagination-btn {
                 padding: 8px 12px;
-                font-size: 0.9em;
+                min-width: 40px;
             }
         }
 
-        @media (max-width: 480px) {
-            main {
-                padding: 20px 15px;
-            }
+        /* Dark mode toggle icon size */
+        .dark-mode-toggle i {
+            font-size: 24px;
+        }
 
-            .page-title {
-                font-size: 1.8em;
-            }
+        /* User dropdown styles */
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e5e9;
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
 
-            .blog-content {
-                padding: 20px;
-            }
+        .user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
 
-            .blog-title {
-                font-size: 1.2em;
-            }
+        .user-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-dropdown .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 5px 0;
+        }
+
+        /* Login Button Styles */
+        .login-button-container {
+            position: relative;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #004494);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
         }
     </style>
 </head>
 <body>
+    <!-- Unified Header -->
     <header>
+    <link rel="icon" href="/favicon.ico">
         <div class="container">
             <div class="logo">
-                <a href="../../home-page.html"><i class="fas fa-keyboard logo-icon"></i> Shortcut Sensei</a>
+                <a href="../../home-page.html">Shortcut Sensei</a>
             </div>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="blogs.html" class="active">Blogs</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                    <li><a href="../../About.htm">About</a></li>
+                    <li><a href="blogs.html">Blogs</a></li>
+                    <li><a href="/Applications.html">Applications</a></li>
+                    <li><a href="/About.html">About</a></li>
+                    <li><a href="/quizs/">Quiz</a></li>
                 </ul>
                 <span class="menu-toggle"><i class="fas fa-bars"></i></span>
             </nav>
-            <div class="search-container">
-                <input type="text" placeholder="Search...">
-                <button type="button"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="dark-mode-toggle">
-              <i class="fa-solid fa-moon"></i>
+            <div class="header-right">
+                <div class="search-container">
+                    <input type="text" placeholder="Search applications..." id="app" aria-label="Search applications">
+                    <button type="button" id="btn" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+                
+                <button class="dark-mode-toggle" id="darkModeToggle">
+                  <i class="fa-solid fa-moon"></i>
+                </button>
+                
+                <!-- User Menu -->
+                <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+                    <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()"></i>
+                    <div class="user-dropdown" id="userDropdownMenu">
+                        <a href="/quizs/?profile=true"><i class="fas fa-user"></i> User Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+
+                <!-- Login Button for non-authenticated users -->
+                <div class="login-button-container" id="loginButtonContainer">
+                    <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
-    <main>
+    <!-- Main content -->
+    <main class="blog-main">
         <!-- Page header -->
         <div class="page-header">
             <h1 class="page-title">Productivity Tips - Page 2</h1>
-            <p class="page-subtitle">Discover advanced productivity techniques and strategies to enhance your workflow</p>
-        </div>
-
-        <!-- Filter section -->
-        <div class="filter-section">
-            <div class="search-bar">
-                <input type="text" class="search-input" placeholder="Search for productivity tips..." id="searchInput">
-                <button class="search-btn" onclick="searchBlogs()">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-            <div class="category-filters">
-                <button class="filter-btn active" onclick="filterCategory('all')">All</button>
-                <button class="filter-btn" onclick="filterCategory('time-management')">Time Management</button>
-                <button class="filter-btn" onclick="filterCategory('workflow')">Workflow</button>
-                <button class="filter-btn" onclick="filterCategory('automation')">Automation</button>
-                <button class="filter-btn" onclick="filterCategory('focus')">Focus</button>
-                <button class="filter-btn" onclick="filterCategory('organization')">Organization</button>
-            </div>
+            <p class="page-subtitle">Explore digital wellness, mindfulness, and sustainable productivity practices for long-term success</p>
         </div>
 
         <!-- Blog grid -->
         <div class="blog-grid">
             <!-- Blog card 1 -->
-            <div class="blog-card" data-category="time-management">
-                <img src="https://images.unsplash.com/photo-1606868306217-dbf5046868d2?w=500&h=300&fit=crop" alt="Pomodoro Technique" class="blog-image">
+            <div class="blog-card" data-category="wellness">
+                <img src="../../images/apps/chrome_tips.jpg" alt="Digital Detox" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Time Management</span>
-                        <span>March 25, 2025</span>
+                        <span class="blog-category">Digital Wellness</span>
+                        <span>March 28, 2025</span>
                     </div>
-                    <h2 class="blog-title">Master the Pomodoro Technique for Better Focus</h2>
-                    <p class="blog-excerpt">Learn how to use the famous Pomodoro Technique to break your work into focused intervals and dramatically improve your productivity and concentration.</p>
-                    <a href="https://pomofocus.io/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Digital Detox: Reclaim Your Focus and Mental Health</h2>
+                    <p class="blog-excerpt">Learn how to disconnect from digital distractions, set healthy boundaries with technology, and create space for deeper thinking and creativity.</p>
+                    <a href="https://www.verywellmind.com/why-and-how-to-do-a-digital-detox-4771321" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 2 -->
-            <div class="blog-card" data-category="workflow">
-                <img src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=500&h=300&fit=crop" alt="Email Management" class="blog-image">
+            <div class="blog-card" data-category="mindfulness">
+                <img src="../../images/apps/Slack.png" alt="Mindful Productivity" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Workflow</span>
-                        <span>March 24, 2025</span>
+                        <span class="blog-category">Mindfulness</span>
+                        <span>March 26, 2025</span>
                     </div>
-                    <h2 class="blog-title">Email Management Strategies That Actually Work</h2>
-                    <p class="blog-excerpt">Transform your inbox from chaos to clarity with proven email management techniques that save time and reduce stress.</p>
-                    <a href="https://www.boomeranggmail.com/blog/email-management/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Mindful Productivity: Working with Intention</h2>
+                    <p class="blog-excerpt">Discover how mindfulness practices can improve your focus, reduce stress, and help you work with greater intention and awareness.</p>
+                    <a href="https://positivepsychology.com/mindfulness-at-work/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 3 -->
-            <div class="blog-card" data-category="automation">
-                <img src="https://images.unsplash.com/photo-1526378800651-c32d170fe6f8?w=500&h=300&fit=crop" alt="Automation Tools" class="blog-image">
+            <div class="blog-card" data-category="habits">
+                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=300&fit=crop" alt="Atomic Habits" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Automation</span>
-                        <span>March 21, 2025</span>
+                        <span class="blog-category">Habits</span>
+                        <span>March 24, 2025</span>
                     </div>
-                    <h2 class="blog-title">Top 10 Automation Tools to Save Time</h2>
-                    <p class="blog-excerpt">Explore the best automation tools like Zapier, IFTTT, and Microsoft Power Automate to streamline repetitive tasks and boost productivity.</p>
-                    <a href="https://zapier.com/blog/best-automation-tools/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Building Atomic Habits for Long-term Success</h2>
+                    <p class="blog-excerpt">Learn James Clear's proven framework for building good habits, breaking bad ones, and mastering the tiny behaviors that lead to remarkable results.</p>
+                    <a href="https://jamesclear.com/atomic-habits" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 4 -->
-            <div class="blog-card" data-category="focus">
-                <img src="https://images.unsplash.com/photo-1493612276216-ee3925520721?w=500&h=300&fit=crop" alt="Deep Work" class="blog-image">
+            <div class="blog-card" data-category="communication">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop" alt="Effective Communication" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Focus</span>
-                        <span>March 19, 2025</span>
+                        <span class="blog-category">Communication</span>
+                        <span>March 22, 2025</span>
                     </div>
-                    <h2 class="blog-title">Deep Work: How to Focus in a Distracted World</h2>
-                    <p class="blog-excerpt">Master the art of sustained concentration and create valuable work that stands out in our increasingly connected world.</p>
-                    <a href="https://calnewport.com/deep-work-rules-for-focused-success-in-a-distracted-world/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Effective Communication in Remote Teams</h2>
+                    <p class="blog-excerpt">Master the art of clear, efficient communication in distributed teams. Learn tools, techniques, and best practices for remote collaboration.</p>
+                    <a href="https://www.atlassian.com/blog/teamwork/remote-team-communication" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 5 -->
-            <div class="blog-card" data-category="organization">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=300&fit=crop" alt="Getting Things Done" class="blog-image">
+            <div class="blog-card" data-category="creativity">
+                <img src="../../images/apps/Trello.png" alt="Creative Productivity" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Organization</span>
-                        <span>March 17, 2025</span>
+                        <span class="blog-category">Creativity</span>
+                        <span>March 20, 2025</span>
                     </div>
-                    <h2 class="blog-title">Getting Things Done: The Ultimate Guide</h2>
-                    <p class="blog-excerpt">Discover David Allen's revolutionary productivity system that helps you capture, organize, and execute all your tasks and projects efficiently.</p>
-                    <a href="https://gettingthingsdone.com/what-is-gtd/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Balancing Structure and Creativity in Your Workflow</h2>
+                    <p class="blog-excerpt">Discover how to create systems that support creativity while maintaining productivity. Learn when to be structured and when to let ideas flow freely.</p>
+                    <a href="https://www.interaction-design.org/literature/article/creativity-and-productivity-how-to-balance-both" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
             
             <!-- Blog card 6 -->
-            <div class="blog-card" data-category="time-management">
-                <img src="https://images.unsplash.com/photo-1495364141860-b0d03eccd065?w=500&h=300&fit=crop" alt="Time Blocking" class="blog-image">
+            <div class="blog-card" data-category="wellness">
+                <img src="../../images/apps/Spotify.jpg" alt="Work-Life Balance" class="blog-image" onerror="this.onerror=null;this.src='../../assets/images/blog-fallback.png';">
                 <div class="blog-content">
                     <div class="blog-meta">
-                        <span class="blog-category">Time Management</span>
-                        <span>March 15, 2025</span>
+                        <span class="blog-category">Digital Wellness</span>
+                        <span>March 18, 2025</span>
                     </div>
-                    <h2 class="blog-title">Time Blocking: Schedule Your Way to Success</h2>
-                    <p class="blog-excerpt">Learn how to use time blocking to take control of your calendar, increase focus, and ensure important tasks get the attention they deserve.</p>
-                    <a href="https://blog.clockify.me/time-blocking/" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                    <h2 class="blog-title">Creating Sustainable Work-Life Balance</h2>
+                    <p class="blog-excerpt">Learn practical strategies for maintaining boundaries between work and personal life, preventing burnout, and sustaining long-term productivity.</p>
+                    <a href="https://www.skillsyouneed.com/ps/work-life-balance.html" target="_blank" class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
         </div>
-
+        
         <!-- Pagination -->
-        <div class="pagination">
-            <a href="blogs.html">&laquo; Previous</a>
-            <a href="blogs.html">1</a>
-            <span class="current">2</span>
-            <a href="blogs-page-3.html">3</a>
-            <a href="blogs-page-4.html">4</a>
-            <a href="blogs-page-5.html">5</a>
-            <a href="blogs-page-6.html">6</a>
-            <a href="blogs-page-7.html">7</a>
-            <a href="blogs-page-8.html">8</a>
-            <a href="blogs-page-9.html">9</a>
-            <a href="blogs-page-10.html">10</a>
-            <a href="blogs-page-3.html">Next &raquo;</a>
+        <div class="blog-pagination">
+            <a href="blogs.html" class="pagination-btn"><i class="fas fa-chevron-left"></i></a>
+            <a href="blogs.html" class="pagination-btn">1</a>
+            <a href="blogs-page-2.html" class="pagination-btn active">2</a>
+            <a href="blogs-page-3.html" class="pagination-btn">3</a>
+            <a href="blogs-page-4.html" class="pagination-btn">4</a>
+            <a href="blogs-page-3.html" class="pagination-btn"><i class="fas fa-chevron-right"></i></a>
         </div>
     </main>
 
-    <!-- Newsletter section -->
-    <div class="newsletter-section">
-        <h2 class="newsletter-heading">Subscribe to Our Newsletter</h2>
-        <p class="newsletter-description">Get the latest shortcuts, productivity tips, and keyboard hacks delivered directly to your inbox. Stay updated with our weekly newsletter.</p>
-        <form class="newsletter-form">
-            <input type="email" placeholder="Your email address" required>
-            <button type="submit">Subscribe</button>
-        </form>
-    </div>
-
+    <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <div class="social-links">
-                <a href="https://www.facebook.com/shortcutsensei" target="_blank"><i class="fab fa-facebook"></i></a>
-                <a href="https://www.twitter.com/shortcutsensei" target="_blank"><i class="fab fa-twitter"></i></a>
-                <a href="https://www.linkedin.com/company/shortcut-sensei" target="_blank"><i class="fab fa-linkedin"></i></a>
-                <a href="https://www.youtube.com/c/shortcutsensei" target="_blank"><i class="fab fa-youtube"></i></a>
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <p>Your ultimate guide to mastering keyboard shortcuts. We provide comprehensive guides and tips to help you work faster and more efficiently.</p>
             </div>
-            <p>&copy; 2024 Shortcut Sensei. All rights reserved.</p>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="../../home-page.html">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="../../About.htm">About</a></li>
+                    <li><a href="Privacy.html">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <ul class="social-icons">
+                    <li><a href="#"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="https://www.youtube.com/@sbmtech2389" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                    <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Subscribe</h3>
+                <form class="subscribe-form" id="subscribeForm">
+                    <input type="email" id="emailInput" placeholder="Your email" required>
+                    <button type="submit" id="subscribeButton">Subscribe</button>
+                </form>
+                <p id="confirmationMessage" style="display: none; color: #8a2be2; font-weight: bold; margin-top: 10px;">Thanks for subscribing to our newsletter!</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Shortcut Sensei. All rights reserved.</p>
         </div>
     </footer>
-
     <script>
-        // Theme toggle functionality
-        function toggleTheme() {
-            const body = document.body;
-            const themeIcon = document.querySelector('.theme-toggle i');
-            
-            body.classList.toggle('dark-mode');
-            
-            if (body.classList.contains('dark-mode')) {
-                themeIcon.className = 'fas fa-sun';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeIcon.className = 'fas fa-moon';
-                localStorage.setItem('theme', 'light');
-            }
-        }
-
-        // Load saved theme
+        // Newsletter subscription handler
         document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme');
-            const themeIcon = document.querySelector('.theme-toggle i');
+            const subscribeForm = document.getElementById('subscribeForm');
+            const emailInput = document.getElementById('emailInput');
+            const confirmationMessage = document.getElementById('confirmationMessage');
             
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-                themeIcon.className = 'fas fa-sun';
+            if (subscribeForm) {
+                subscribeForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = emailInput.value.trim();
+                    
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        subscribeForm.style.display = 'none';
+                        confirmationMessage.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            subscribeForm.style.display = 'flex';
+                            confirmationMessage.style.display = 'none';
+                            emailInput.value = '';
+                        }, 5000);
+                    } else {
+                        alert('Please enter a valid email address.');
+                    }
+                });
             }
         });
-
-        // Filter functionality
+        
+        // Filter functionality for blog pages
         function filterCategory(category) {
-            const cards = document.querySelectorAll('.blog-card');
-            const buttons = document.querySelectorAll('.filter-btn');
+            const blogCards = document.querySelectorAll('.blog-card');
+            const filterButtons = document.querySelectorAll('.filter-btn');
             
             // Update active button
-            buttons.forEach(btn => btn.classList.remove('active'));
+            filterButtons.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Filter cards
-            cards.forEach(card => {
+            // Show/hide cards based on category
+            blogCards.forEach(card => {
                 if (category === 'all' || card.dataset.category === category) {
                     card.style.display = 'block';
                 } else {
@@ -857,12 +1130,13 @@
             });
         }
 
-        // Search functionality
+        // Search functionality for blog pages
         function searchBlogs() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.blog-card');
+            const searchInput = document.getElementById('searchInput');
+            const blogCards = document.querySelectorAll('.blog-card');
+            const searchTerm = searchInput.value.toLowerCase();
             
-            cards.forEach(card => {
+            blogCards.forEach(card => {
                 const title = card.querySelector('.blog-title').textContent.toLowerCase();
                 const excerpt = card.querySelector('.blog-excerpt').textContent.toLowerCase();
                 const category = card.querySelector('.blog-category').textContent.toLowerCase();
@@ -875,24 +1149,131 @@
             });
         }
 
-        // Search on Enter key
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchBlogs();
-            }
-        });
+        // Theme toggle functionality
+        function toggleDarkMode() {
+            const body = document.body;
+            const isDarkMode = body.classList.toggle('dark-mode');
+            
+            // Save preference to localStorage
+            localStorage.setItem('darkMode', isDarkMode);
+            
+            // Update icon
+            updateDarkModeIcon(isDarkMode);
+        }
 
-        // Smooth scroll for pagination
-        document.querySelectorAll('.pagination a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (this.getAttribute('href').startsWith('#')) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
+        function updateDarkModeIcon(isDarkMode) {
+            const icon = document.querySelector('.dark-mode-toggle i');
+            if (icon) {
+                if (isDarkMode) {
+                    icon.className = 'fa-solid fa-sun';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                }
+            }
+        }
+
+        function initializeDarkMode() {
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            const body = document.body;
+            
+            // Check for saved dark mode preference or default to light mode
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                updateDarkModeIcon(true);
+            }
+            
+            // Add click event listener to dark mode toggle
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('click', toggleDarkMode);
+            }
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDarkMode();
+            
+            // Initialize search functionality
+            initializeSearch();
+        });
+        
+        // Search functionality for application shortcuts
+        function initializeSearch() {
+            // List of all applications with their page URLs
+            const applications = [
+                { name: "microsoft word", url: "../../Microsoft Word.htm" },
+                { name: "word", url: "../../Microsoft Word.htm" },
+                { name: "microsoft excel", url: "../../Microsoft Excell.htm" },
+                { name: "excel", url: "../../Microsoft Excell.htm" },
+                { name: "microsoft excell", url: "../../Microsoft Excell.htm" },
+                { name: "excell", url: "../../Microsoft Excell.htm" },
+                { name: "powerpoint", url: "../../Microsoft PowerPoint.htm" },
+                { name: "microsoft powerpoint", url: "../../Microsoft PowerPoint.htm" },
+                { name: "chrome", url: "../../Chrome.htm" },
+                { name: "google chrome", url: "../../Chrome.htm" },
+                { name: "firefox", url: "../../Firefox.htm" },
+                { name: "mozilla firefox", url: "../../Firefox.htm" },
+                { name: "photoshop", url: "../../Photoshop.htm" },
+                { name: "adobe photoshop", url: "../../Photoshop.htm" }
+            ];
+
+            const searchInput = document.getElementById('app');
+            const searchButton = document.getElementById('btn');
+            const searchResults = document.getElementById('searchResults');
+
+            // Function to display search results
+            function displaySearchResults(query) {
+                // Clear previous results
+                searchResults.innerHTML = '';
+                
+                if (!query) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                query = query.toLowerCase().trim();
+                
+                // Filter applications based on query (starts with query)
+                const matchingApps = applications.filter(app => app.name.startsWith(query));
+                
+                if (matchingApps.length === 0) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                // Create and display results
+                matchingApps.forEach(app => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.textContent = app.name.charAt(0).toUpperCase() + app.name.slice(1);
+                    
+                    resultItem.addEventListener('click', () => {
+                        window.location.href = app.url;
                     });
+                    
+                    searchResults.appendChild(resultItem);
+                });
+                
+                searchResults.style.display = 'block';
+            }
+
+            // Event listeners
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    displaySearchResults(this.value);
+                });
+            }
+            
+            // Close results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (searchInput && searchResults && !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
                 }
             });
-        });
+        }
     </script>
+    <script src="../../assets/js/global-user-manager.js"></script>
+    <script src="../../assets/js/unified-system.js"></script>
 </body>
 </html>

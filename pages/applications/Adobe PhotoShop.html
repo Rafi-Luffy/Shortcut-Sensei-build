@@ -6,6 +6,12 @@
     <title>Adobe PhotoShop Shortcuts - Shortcut Sensei</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/app-search.css">
+    
+    <!-- MongoDB Authentication -->
+    <script src="../../assets/js/mongodb-auth.js"></script>
+    <script src="../../assets/js/bookmark-handler.js"></script>
+    <script src="../../assets/js/app-search.js"></script>
     <style>
         /* Base styles with CSS variables for easier theming */
         :root {
@@ -31,6 +37,11 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
         }
         
         body {
@@ -902,14 +913,14 @@
 <header>
     <div class="container">
         <div class="logo">
-            <a href="../../home-page.html"><i class="fas fa-keyboard logo-icon"></i> Shortcut Sensei</a>
+            <a href="../../home-page.html">Shortcut Sensei</a>
         </div>
         <nav class="main-nav">
             <ul>
-                <li><a href="../blogs/blogs.html">Blogs</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="../../About.htm">About</a></li>
+                <li><a href="/pages/blogs/blogs.html">Blogs</a></li>
+                <li><a href="/Applications.html">Applications</a></li>
+                <li><a href="/About.html">About</a></li>
+                <li><a href="/quizs/">Quiz</a></li>
             </ul>
             <span class="menu-toggle"><i class="fas fa-bars"></i></span>
         </nav>
@@ -917,8 +928,25 @@
             <input type="text" placeholder="Search...">
             <button type="button"><i class="fas fa-search"></i></button>
         </div>
-        <div class="dark-mode-toggle">
+        <div class="dark-mode-toggle" onclick="toggleDarkMode()">
           <i class="fa-solid fa-moon"></i>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+            <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
+            <div class="user-dropdown" id="userDropdownMenu">
+                <a href="/quizs/?profile=true"><i class="fas fa-user"></i> My Profile</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <!-- Login Button -->
+        <div class="login-button-container" id="loginButtonContainer">
+            <button class="login-btn" onclick="window.location.href='../user/login_page.html'">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
         </div>
     </div>
 </header>
@@ -933,15 +961,12 @@
         </p>
         
         <div class="featured-image-container">
-            <img src="Adobe PhotoShop.webp" alt="Adobe Photoshop Interface" class="featured-image">
+            <img src="../../images/apps/Adobe PhotoShop.webp" alt="Adobe Photoshop Interface" class="featured-image">
         </div>
         
         <div class="actions-toolbar">
             <button class="action-button" id="print-btn">
                 <i class="fas fa-print"></i> Print Guide
-            </button>
-            <button class="action-button" id="download-btn">
-                <i class="fas fa-download"></i> Download PDF
             </button>
             <button class="action-button" id="share-btn">
                 <i class="fas fa-share-alt"></i> Share
@@ -2441,6 +2466,13 @@
         });
     </script>
     
-    </body>
+        <script src="../../assets/js/unified-system.js"></script>
+        
+        <!-- Global Managers for User Profile, Bookmarks, and Dark Mode -->
+        <script src="../../assets/js/global-user-manager.js"></script>
+        <script src="../../assets/js/bookmark-manager.js"></script>
+        <script src="../../assets/js/dark-mode-manager.js"></script>
+        <script src="../../assets/js/footer-manager.js"></script>
+</body>
     </html>
     
