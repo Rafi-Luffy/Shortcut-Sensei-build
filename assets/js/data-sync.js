@@ -319,7 +319,7 @@ class DataSyncService {
    */
   setSyncInterval(interval) {
     this.syncInterval = interval;
-    console.log(`⏰ Sync interval updated to ${interval}ms`);
+    console.log(`Sync interval updated to ${interval}ms`);
   }
 }
 

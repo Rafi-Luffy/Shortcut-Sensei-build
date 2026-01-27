@@ -66,10 +66,10 @@ async function sendSupportEmail(name, email, subject, message) {
     };
     
     const result = await client.messages.create(domain, messageData);
-    console.log(`✅ Support email sent successfully! Message ID: ${result.id}`);
+    console.log(`Support email sent successfully! Message ID: ${result.id}`);
     return { success: true, messageId: result.id };
   } catch (error) {
-    console.error('❌ Mailgun support email error:', error.message);
+    console.error('Mailgun support email error:', error.message);
     throw error;
   }
 }

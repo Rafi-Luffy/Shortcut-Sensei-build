@@ -10,9 +10,9 @@ if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
     key: process.env.MAILGUN_API_KEY,
     url: 'https://api.mailgun.net'
   });
-  console.log('✅ Mailgun email service initialized');
+  console.log('Mailgun email service initialized');
 } else {
-  console.warn('⚠️  Mailgun credentials not found. Email features will be disabled.');
+  console.warn('Mailgun credentials not found. Email features will be disabled.');
 }
 
 // Send verification email

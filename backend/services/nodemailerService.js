@@ -76,10 +76,10 @@ async function sendPasswordResetEmail(email, name, resetToken) {
     };
     
     const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ Password reset email sent successfully! Message ID: ${info.messageId}`);
+    console.log(`Password reset email sent successfully! Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('❌ Nodemailer password reset email error:', error.message);
+    console.error('Nodemailer password reset email error:', error.message);
     throw error;
   }
 }

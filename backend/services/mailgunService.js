@@ -37,11 +37,11 @@ async function sendWelcomeEmail(email, name) {
     
     console.log(`📤 Sending message with template...`);
     const result = await client.messages.create(domain, messageData);
-    console.log(`✅ Welcome email sent successfully! Message ID: ${result.id}`);
+    console.log(`Welcome email sent successfully! Message ID: ${result.id}`);
     return { success: true, messageId: result.id };
   } catch (error) {
-    console.error('❌ Mailgun welcome email error:', error.message);
-    console.error('❌ Full error:', error);
+    console.error('Mailgun welcome email error:', error.message);
+    console.error('Full error:', error);
     throw error;
   }
 }
@@ -110,10 +110,10 @@ async function sendPasswordResetEmail(email, name, resetToken) {
     };
     
     const result = await client.messages.create(domain, messageData);
-    console.log(`✅ Password reset email sent successfully! Message ID: ${result.id}`);
+    console.log(`Password reset email sent successfully! Message ID: ${result.id}`);
     return { success: true, messageId: result.id };
   } catch (error) {
-    console.error('❌ Mailgun password reset email error:', error.message);
+    console.error('Mailgun password reset email error:', error.message);
     throw error;
   }
 }

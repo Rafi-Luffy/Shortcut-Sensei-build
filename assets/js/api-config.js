@@ -8,7 +8,8 @@ const API_BASE_URL = (function() {
   ) {
     return 'http://localhost:5000/api';
   }
-  return window.location.origin + '/api';
+  // Production: Use backend URL from environment or default deployed backend
+  return 'https://shortcut-sensei-backend.onrender.com/api';
 })();
 
 // Helper function to make API calls
