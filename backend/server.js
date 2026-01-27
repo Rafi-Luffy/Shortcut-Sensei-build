@@ -33,10 +33,7 @@ app.use(helmet({
 }));
 app.use(morgan('common'));
 
-// Serve static files from the parent directory
-app.use(express.static(path.join(__dirname, '..')));
-
-// Serve uploaded files
+// Serve uploaded files only (backend is API-only, frontend is separate)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rate limiting to prevent brute-force attacks

@@ -1,16 +1,27 @@
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
 
-// Initialize Mailgun
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-  username: 'api',
-  key: process.env.MAILGUN_API_KEY,
-  url: 'https://api.mailgun.net'
-});
+// Initialize Mailgun only if credentials are provided
+let mg = null;
+if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
+  const mailgun = new Mailgun(formData);
+  mg = mailgun.client({
+    username: 'api',
+    key: process.env.MAILGUN_API_KEY,
+    url: 'https://api.mailgun.net'
+  });
+  console.log('✅ Mailgun email service initialized');
+} else {
+  console.warn('⚠️  Mailgun credentials not found. Email features will be disabled.');
+}
 
 // Send verification email
 const sendVerificationEmail = async (email, displayName, verificationToken) => {
+  if (!mg) {
+    console.warn('Email service not configured. Skipping verification email.');
+    return { success: false, message: 'Email service not configured' };
+  }
+  
   try {
     const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
 
