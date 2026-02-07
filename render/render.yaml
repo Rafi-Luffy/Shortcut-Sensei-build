@@ -24,12 +24,14 @@ services:
   - type: web
     name: shortcut-sensei-frontend
     runtime: static
-    buildCommand: "npm run build"
-    staticPublishPath: ./build
+    buildCommand: "cd quizs && npm install && npm run build && cd .."
+    staticPublishPath: quizs/build
     pullRequestPreviewsEnabled: true
     envVars:
       - key: NODE_ENV
         value: production
+      - key: REACT_APP_API_URL
+        sync: false # Set this manually to your backend URL: https://your-backend-service.onrender.com
 
 databases:
   - name: shortcut-sensei-db

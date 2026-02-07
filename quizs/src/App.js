@@ -26,10 +26,11 @@ const APPLICATIONS = [
   "Trello", "Spotify", "WinRAR", "7-Zip","Mozilla ThunderBird"
 ];
 
-// API origin helper (frontend :3000, backend :5000 in local dev)
-const API_ORIGIN = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-  ? 'http://localhost:5000'
-  : window.location.origin;
+// API origin helper - uses environment variable or defaults to localhost for development
+const API_ORIGIN = process.env.REACT_APP_API_URL || 
+  ((typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:5000'
+    : window.location.origin);
 const FRONTEND_ORIGIN = (typeof window !== 'undefined')
   ? window.location.origin
   : '';
