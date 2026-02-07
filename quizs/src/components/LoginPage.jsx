@@ -8,20 +8,53 @@ function getModeFromPath() {
   return params.get('mode') === 'signup' ? 'signup' : 'signin';
 }
 
+// Password strength checker
+function checkPasswordStrength(password) {
+  let strength = 0;
+  const feedback = [];
+
+  if (password.length >= 8) strength++;
+  else feedback.push('At least 8 characters');
+
+  if (/[a-z]/.test(password)) strength++;
+  else feedback.push('Lowercase letter');
+
+  if (/[A-Z]/.test(password)) strength++;
+  else feedback.push('Uppercase letter');
+
+  if (/[0-9]/.test(password)) strength++;
+  else feedback.push('Number');
+
+  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
+  else feedback.push('Special character');
+
+  return {
+    strength,
+    isValid: strength >= 3,
+    feedback,
+    label: strength === 0 ? 'Too weak' : strength === 1 ? 'Weak' : strength === 2 ? 'Fair' : strength === 3 ? 'Good' : strength === 4 ? 'Strong' : 'Very Strong'
+  };
+}
+
 export default function LoginPage({ onLoginSuccess }) {
   const initialMode = useMemo(() => getModeFromPath(), []);
   const [mode, setMode] = useState(initialMode);
   
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
+  const [signInShowPassword, setSignInShowPassword] = useState(false);
   const [signInError, setSignInError] = useState('');
   const [signInLoading, setSignInLoading] = useState(false);
   
   const [signUpName, setSignUpName] = useState('');
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
+  const [signUpShowPassword, setSignUpShowPassword] = useState(false);
+  const [signUpShowConfirmPassword, setSignUpShowConfirmPassword] = useState(false);
   const [signUpError, setSignUpError] = useState('');
   const [signUpLoading, setSignUpLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(null);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -74,6 +107,21 @@ export default function LoginPage({ onLoginSuccess }) {
     e.preventDefault();
     setSignUpError('');
     setSignUpLoading(true);
+
+    // Validate passwords match
+    if (signUpPassword !== signUpConfirmPassword) {
+      setSignUpError('Passwords do not match');
+      setSignUpLoading(false);
+      return;
+    }
+
+    // Check password strength
+    const strength = checkPasswordStrength(signUpPassword);
+    if (!strength.isValid) {
+      setSignUpError(`Password is too weak. Please add: ${strength.feedback.join(', ')}`);
+      setSignUpLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -151,17 +199,102 @@ export default function LoginPage({ onLoginSuccess }) {
               disabled={signUpLoading}
             />
             
-            <input
-              type="password"
-              placeholder="Password"
-              value={signUpPassword}
-              onChange={(e) => setSignUpPassword(e.target.value)}
-              required
-              minLength="6"
-              disabled={signUpLoading}
-            />
+            <div style={{ position: 'relative', marginBottom: '10px' }}>
+              <input
+                type={signUpShowPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={signUpPassword}
+                onChange={(e) => {
+                  setSignUpPassword(e.target.value);
+                  setPasswordStrength(checkPasswordStrength(e.target.value));
+                }}
+                required
+                disabled={signUpLoading}
+                style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+              />
+              <button
+                type="button"
+                onClick={() => setSignUpShowPassword(!signUpShowPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  padding: '0'
+                }}
+              >
+                {signUpShowPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
+
+            {passwordStrength && (
+              <div style={{
+                marginBottom: '10px',
+                padding: '8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                backgroundColor: passwordStrength.strength <= 1 ? '#ffebee' : passwordStrength.strength <= 2 ? '#fff3e0' : passwordStrength.strength <= 3 ? '#e8f5e9' : '#e3f2fd',
+                color: passwordStrength.strength <= 1 ? '#c62828' : passwordStrength.strength <= 2 ? '#e65100' : passwordStrength.strength <= 3 ? '#2e7d32' : '#1565c0'
+              }}>
+                <strong>Password strength: {passwordStrength.label}</strong>
+                {passwordStrength.feedback.length > 0 && (
+                  <div style={{ marginTop: '4px' }}>
+                    Add: {passwordStrength.feedback.join(', ')}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div style={{ position: 'relative', marginBottom: '10px' }}>
+              <input
+                type={signUpShowConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm Password"
+                value={signUpConfirmPassword}
+                onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                required
+                disabled={signUpLoading}
+                style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+              />
+              <button
+                type="button"
+                onClick={() => setSignUpShowConfirmPassword(!signUpShowConfirmPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  padding: '0'
+                }}
+              >
+                {signUpShowConfirmPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
+
+            {signUpPassword && signUpConfirmPassword && signUpPassword !== signUpConfirmPassword && (
+              <div style={{
+                marginBottom: '10px',
+                padding: '8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                backgroundColor: '#ffebee',
+                color: '#c62828'
+              }}>
+                ⚠️ Passwords do not match
+              </div>
+            )}
             
-            <button type="submit" disabled={signUpLoading}>
+            <button 
+              type="submit" 
+              disabled={signUpLoading || signUpPassword !== signUpConfirmPassword || (passwordStrength && !passwordStrength.isValid)}
+            >
               {signUpLoading ? 'Signing Up...' : 'Sign Up'}
             </button>
           </form>
@@ -184,14 +317,34 @@ export default function LoginPage({ onLoginSuccess }) {
               disabled={signInLoading}
             />
             
-            <input
-              type="password"
-              placeholder="Password"
-              value={signInPassword}
-              onChange={(e) => setSignInPassword(e.target.value)}
-              required
-              disabled={signInLoading}
-            />
+            <div style={{ position: 'relative', marginBottom: '10px' }}>
+              <input
+                type={signInShowPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={signInPassword}
+                onChange={(e) => setSignInPassword(e.target.value)}
+                required
+                disabled={signInLoading}
+                style={{ paddingRight: '40px', width: '100%', boxSizing: 'border-box' }}
+              />
+              <button
+                type="button"
+                onClick={() => setSignInShowPassword(!signInShowPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  padding: '0'
+                }}
+              >
+                {signInShowPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             
             <button type="submit" disabled={signInLoading}>
               {signInLoading ? 'Signing In...' : 'Sign In'}
