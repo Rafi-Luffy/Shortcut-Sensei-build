@@ -364,10 +364,10 @@ function getRandomStreak() {
 // Seed users
 async function seedUsers() {
   try {
-    // Connect to MongoDB
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/shortcut-sensei';
+    // Connect to Supabase Postgres
+    const mongoURI = process.env.SUPABASE_CONNECTION_STRING || 'supabase://localhost:27017/shortcut-sensei';
     await mongoose.connect(mongoURI);
-    console.log('✅ Connected to MongoDB');
+    console.log('✅ Connected to Supabase Postgres');
 
     // Clear existing users (optional - comment out if you want to keep existing users)
     // await User.deleteMany({});

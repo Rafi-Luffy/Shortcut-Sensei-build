@@ -6,13 +6,13 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 const path = require('path');
-const connectDB = require('./config/database');
+const { createSupabaseAdminClient, validateSupabaseEnv } = require('./config/supabase');
 const appConfig = require('./config/production-config');
 
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+validateSupabaseEnv();
+const supabase = createSupabaseAdminClient();
 
 // Initialize data sync service with error handling (disabled for testing)
 // try {
@@ -41,22 +41,19 @@ const limiter = rateLimit(appConfig.rateLimitOptions);
 app.use(limiter);
 
 // Import routes
-const authRoutes = require('./routes/auth');
 const clerkRoutes = require('./routes/clerk');
 const userRoutes = require('./routes/users');
 const questionRoutes = require('./routes/questions');
-// const analyticsRoutes = require('./routes/analytics'); // Commented out - file missing
+const communityRoutes = require('./routes/community');
 const searchRoutes = require('./routes/search');
-const syncRoutes = require('./routes/sync');
 
 // API Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/clerk', clerkRoutes);
+app.use('/api/auth', userRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/questions', questionRoutes);
-// app.use('/api/analytics', analyticsRoutes); // Commented out - file missing
+app.use('/api/community', communityRoutes);
 app.use('/api/search', searchRoutes);
-app.use('/api/sync', syncRoutes);
 
 // Basic Routes
 app.get('/', (req, res) => {
@@ -64,19 +61,26 @@ app.get('/', (req, res) => {
     message: 'Shortcut Sensei API',
     version: '1.0.0',
     endpoints: {
+      clerk: '/api/clerk',
       users: '/api/users',
       questions: '/api/questions',
-      analytics: '/api/analytics',
+      community: '/api/community',
       search: '/api/search'
     }
   });
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  const mongoose = require('mongoose');
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-  
+app.get('/health', async (req, res) => {
+  let dbStatus = 'unknown';
+
+  try {
+    const { error } = await supabase.from('users').select('id', { head: true, count: 'exact' });
+    dbStatus = error ? 'error' : 'connected';
+  } catch (error) {
+    dbStatus = 'error';
+  }
+
   res.json({
     status: 'OK',
     database: dbStatus,
@@ -204,6 +208,6 @@ app.use('/api/*', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log('MongoDB connected successfully');
+  console.log('Supabase connected successfully');
   console.log(`API endpoints available at http://localhost:${PORT}/api`);
 });

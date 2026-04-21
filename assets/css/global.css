@@ -16,6 +16,16 @@
     --shadow-dark: 0 4px 8px rgba(0, 0, 0, 0.3);
     --border-radius: 8px;
     --transition-speed: 0.3s;
+    --container-max: 1200px;
+    --container-pad: clamp(12px, 2.6vw, 32px);
+    --section-space: clamp(28px, 6vh, 72px);
+    --space-xs: clamp(6px, 1.2vw, 10px);
+    --space-sm: clamp(10px, 1.8vw, 16px);
+    --space-md: clamp(14px, 2.2vw, 22px);
+    --space-lg: clamp(20px, 3vw, 34px);
+    --h1-fluid: clamp(1.6rem, 4.8vw, 3.2rem);
+    --h2-fluid: clamp(1.25rem, 3vw, 2.2rem);
+    --body-fluid: clamp(0.92rem, 1.4vw, 1.05rem);
 }
 
 * {
@@ -30,6 +40,15 @@ body {
     color: var(--light-text);
     line-height: 1.6;
     transition: background-color var(--transition-speed), color var(--transition-speed);
+    overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Header styles */
@@ -47,9 +66,10 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 90%;
+    width: min(var(--container-max), 100%);
     margin: 0 auto;
-    max-width: 1200px;
+    max-width: var(--container-max);
+    padding-inline: var(--container-pad);
 }
 
 .logo a {
@@ -85,6 +105,7 @@ header {
     display: block;
     transition: all var(--transition-speed) ease;
     border-radius: var(--border-radius);
+    white-space: nowrap;
 }
 
 .main-nav ul li a:hover {
@@ -209,6 +230,336 @@ footer {
     margin-top: 15px;
     max-width: 420px;
     width: 100%;
+}
+
+/* ============================================
+   SHARED RESPONSIVE QUALITY LAYER
+   ============================================ */
+
+main,
+section,
+.section,
+.content,
+.hero,
+.app-container,
+.profile-container,
+.quiz-container,
+.difficulty-container,
+.results-container,
+.results-analysis-page {
+    max-width: 100%;
+}
+
+.hero h1,
+h1.hero-title,
+.page-title {
+    font-size: var(--h1-fluid);
+    line-height: 1.15;
+}
+
+.hero p,
+.subtitle,
+.page-subtitle,
+body {
+    font-size: var(--body-fluid);
+}
+
+.card,
+.feature-card,
+.app-card,
+.profile-card,
+.quiz-card,
+.stats-card,
+.shortcut-strip,
+.review-card,
+.profile-section,
+.question-palette,
+.question-area {
+    width: 100%;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.floating-get-started,
+.floating-cta,
+.back-to-top-btn,
+.fab,
+[class*="floating"] {
+    max-width: min(88vw, 280px);
+}
+
+.modal,
+.modal-content,
+.overlay,
+.dropdown,
+.user-dropdown {
+    max-width: min(96vw, 560px);
+}
+
+input,
+select,
+textarea,
+button,
+.btn,
+.login-btn {
+    max-width: 100%;
+}
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+    .container,
+    .main-header .container,
+    .footer-content,
+    .content,
+    .app-container {
+        padding-inline: clamp(12px, 3.6vw, 20px) !important;
+    }
+
+    .main-nav ul {
+        gap: clamp(8px, 2vw, 16px);
+    }
+
+    .main-nav ul li a {
+        padding: 8px 10px;
+        font-size: 0.95rem;
+    }
+
+    .hero,
+    .page-hero,
+    .section {
+        padding-block: clamp(28px, 6vh, 56px);
+    }
+}
+
+/* Mobile navigation and compact header */
+@media (max-width: 992px) {
+    html,
+    body {
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100%;
+    }
+
+    .main-header,
+    header {
+        padding-block: 10px !important;
+    }
+
+    .main-header .container,
+    header .container {
+        display: grid !important;
+        grid-template-columns: auto auto auto;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .header-left {
+        min-width: 0;
+    }
+
+    .logo {
+        margin-right: 0 !important;
+        min-width: 0;
+    }
+
+    .logo a {
+        font-size: clamp(1.05rem, 4.2vw, 1.35rem) !important;
+        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: min(52vw, 220px);
+    }
+
+    .menu-toggle {
+        display: block !important;
+        justify-self: end;
+        padding: 8px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    /* Keep app pages scrollable and let page-level menu CSS control behavior */
+    .main-nav {
+        position: static !important;
+        top: auto;
+        left: auto;
+        width: auto;
+        height: auto;
+        background: transparent;
+        transform: none;
+        transition: none;
+        z-index: auto;
+        overflow: visible;
+        margin-left: 0 !important;
+        max-width: 100% !important;
+        justify-content: flex-start;
+    }
+
+    .main-nav.show,
+    .main-nav.active {
+        transform: none;
+    }
+
+    .main-nav ul,
+    .main-nav ul.show {
+        position: static !important;
+        max-width: 100%;
+    }
+
+    .header-right {
+        justify-self: end;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        overflow: visible;
+    }
+
+    .header-right .user-menu-container {
+        margin-left: 0 !important;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .header-right .user-avatar,
+    .header-right #headerAvatar {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 34px !important;
+        line-height: 1 !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        max-width: 34px;
+        max-height: 34px;
+        flex: 0 0 auto;
+    }
+
+    .login-btn,
+    .user-avatar,
+    .dark-mode-toggle,
+    [id*="darkMode"] {
+        min-height: 40px;
+    }
+}
+
+/* Phones */
+@media (max-width: 768px) {
+    .hero,
+    .page-hero,
+    section {
+        padding-block: clamp(22px, 6vh, 40px) !important;
+    }
+
+    .hero .content,
+    .hero-content {
+        width: min(100%, 680px);
+        margin-inline: auto;
+        padding-inline: 2px;
+    }
+
+    .hero p {
+        max-width: 38ch;
+        margin-inline: auto;
+    }
+
+    .feature-grid,
+    .cards-grid,
+    .app-grid,
+    .difficulty-grid,
+    .profile-grid,
+    .results-main-layout {
+        grid-template-columns: 1fr !important;
+        display: grid;
+        gap: var(--space-md);
+    }
+
+    .floating-get-started,
+    .floating-cta,
+    .back-to-top-btn,
+    [class*="floating"] {
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(12px, env(safe-area-inset-bottom));
+        padding: 10px 14px;
+        font-size: 0.86rem;
+        min-height: 40px;
+    }
+
+    .modal,
+    .modal-content {
+        width: min(96vw, 560px);
+        max-height: calc(100dvh - 18px);
+        overflow: auto;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .logo a {
+        max-width: min(50vw, 170px);
+    }
+
+    .container,
+    .main-header .container,
+    header .container,
+    .footer-content,
+    .app-container {
+        padding-inline: 10px !important;
+    }
+
+    .login-btn {
+        padding: 8px 12px;
+        font-size: 0.82rem;
+    }
+
+    .social-icons,
+    .social-links {
+        gap: 10px;
+    }
+
+    .social-icons li a,
+    .social-links a {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+}
+
+/* Short-height displays (small laptops / landscape phones) */
+@media (max-height: 700px) {
+    .hero,
+    .page-hero,
+    section {
+        padding-block: clamp(16px, 4.2vh, 36px) !important;
+    }
+
+    .main-header,
+    header {
+        position: sticky;
+        top: 0;
+    }
+
+    .floating-get-started,
+    .floating-cta,
+    [class*="floating"] {
+        bottom: 10px;
+    }
+}
+
+/* Ultra-wide desktops */
+@media (min-width: 1600px) {
+    :root {
+        --container-max: 1440px;
+    }
+
+    .container,
+    .main-header .container,
+    .footer-content,
+    .app-container {
+        max-width: var(--container-max);
+    }
 }
 
 .subscribe-form input[type="email"] {

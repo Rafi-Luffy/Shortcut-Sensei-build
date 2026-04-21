@@ -325,4 +325,10 @@ class DataSyncService {
 
 export { DataSyncService };
 
-module.exports = DataSyncService;
+if (typeof window !== 'undefined') {
+  window.DataSyncService = DataSyncService;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = DataSyncService;
+}

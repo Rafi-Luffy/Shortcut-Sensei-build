@@ -66,6 +66,128 @@ function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [userAvatarUrl, setUserAvatarUrl] = useState('');
 
+  // Runtime guard: force scrollability even if conflicting CSS gets applied.
+  const enforceScrollableViewport = useCallback(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const root = document.getElementById('root');
+
+    if (!html || !body || !root) return;
+
+    html.style.height = 'auto';
+    html.style.minHeight = '100%';
+    html.style.overflowX = 'hidden';
+    html.style.overflowY = 'auto';
+    html.style.overscrollBehavior = 'auto';
+    html.style.position = 'static';
+    html.style.touchAction = 'auto';
+
+    body.style.height = 'auto';
+    body.style.minHeight = '100vh';
+    body.style.overflowX = 'hidden';
+    body.style.overflowY = 'auto';
+    body.style.overscrollBehavior = 'auto';
+    body.style.position = 'static';
+    body.style.touchAction = 'auto';
+
+    root.style.height = 'auto';
+    root.style.minHeight = '100vh';
+    root.style.overflowX = 'hidden';
+    root.style.overflowY = 'visible';
+    root.style.overscrollBehavior = 'auto';
+    root.style.position = 'static';
+    root.style.display = 'block';
+  }, []);
+
+  useEffect(() => {
+    const applyThemeFromStorage = () => {
+      const html = document.documentElement;
+      const body = document.body;
+      const themeValue = localStorage.getItem('theme');
+      const darkModeValue = localStorage.getItem('darkMode');
+      const isDark = themeValue === 'dark' || darkModeValue === 'true';
+
+      html.classList.toggle('dark-mode', isDark);
+      body.classList.toggle('dark-mode', isDark);
+      html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    };
+
+    applyThemeFromStorage();
+    window.addEventListener('storage', applyThemeFromStorage);
+    window.addEventListener('focus', applyThemeFromStorage);
+
+    return () => {
+      window.removeEventListener('storage', applyThemeFromStorage);
+      window.removeEventListener('focus', applyThemeFromStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    enforceScrollableViewport();
+    const rafId = window.requestAnimationFrame(enforceScrollableViewport);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
+  }, [enforceScrollableViewport, showProfile, showQuiz, showDifficultySelection, selectedApp, selectedDifficulty]);
+
+  useEffect(() => {
+    const isScrollableY = (element) => {
+      if (!element || element === document.body || element === document.documentElement) return false;
+      const style = window.getComputedStyle(element);
+      const overflowY = style.overflowY;
+      const allowsScroll = overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay';
+      return allowsScroll && element.scrollHeight > element.clientHeight;
+    };
+
+    const hasScrollableAncestorInDirection = (start, deltaY) => {
+      let current = start;
+      while (current && current !== document.body && current !== document.documentElement) {
+        if (isScrollableY(current)) {
+          const canScrollDown = deltaY > 0 && (current.scrollTop + current.clientHeight < current.scrollHeight);
+          const canScrollUp = deltaY < 0 && current.scrollTop > 0;
+          if (canScrollDown || canScrollUp) {
+            return true;
+          }
+        }
+        current = current.parentElement;
+      }
+      return false;
+    };
+
+    const onWheel = (event) => {
+      if (event.defaultPrevented) return;
+
+      const target = event.target;
+      if (!target) return;
+
+      const tagName = target.tagName ? target.tagName.toLowerCase() : '';
+      if (tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable) {
+        return;
+      }
+
+      if (hasScrollableAncestorInDirection(target, event.deltaY)) {
+        return;
+      }
+
+      const scroller = document.scrollingElement || document.documentElement;
+      if (!scroller) return;
+
+      const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
+      if (maxScrollTop <= 0) return;
+
+      const previous = scroller.scrollTop;
+      const next = Math.max(0, Math.min(maxScrollTop, previous + event.deltaY));
+      if (next !== previous) {
+        scroller.scrollTop = next;
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('wheel', onWheel, { capture: true, passive: false });
+    return () => document.removeEventListener('wheel', onWheel, { capture: true });
+  }, []);
+
   // Check login status on mount
   useEffect(() => {
     const pathname = window.location.pathname;
@@ -124,7 +246,7 @@ function App() {
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {
         // Redirect to login if not authenticated
-        window.location.href = `${FRONTEND_ORIGIN}/pages/user/login_page.html`;
+        window.location.href = `${FRONTEND_ORIGIN}/quizs/?mode=signin`;
       }
     }
     
@@ -197,7 +319,7 @@ function App() {
                   localStorage.getItem('authToken');
     if (!token) {
       alert('Please log in to take the quiz!');
-      window.location.href = `${FRONTEND_ORIGIN}/pages/user/login_page.html`;
+      window.location.href = `${FRONTEND_ORIGIN}/quizs/?mode=signin`;
       return;
     }
     
@@ -260,6 +382,7 @@ function App() {
     if (token && (displayName || email)) {
       setIsLoggedIn(true);
       setUserDisplayName(displayName || email.split('@')[0]);
+      window.location.href = `${FRONTEND_ORIGIN}/home-page.html`;
     }
   };
 
@@ -333,7 +456,7 @@ function App() {
                   )}
                 </div>
               ) : (
-                <button className="login-btn" onClick={() => window.location.href = `${FRONTEND_ORIGIN}/pages/user/login_page.html`}>
+                <button className="login-btn" onClick={() => window.location.href = `${FRONTEND_ORIGIN}/quizs/?mode=signin`}>
                   <i className="fas fa-sign-in-alt"></i> Log In
                 </button>
               )}
@@ -1265,7 +1388,13 @@ function Quiz({ appName, difficulty, quizData, onBackToApps }) {
     <div className="manaquiz-container">
       {/* Top Header */}
       <div className="manaquiz-header">
-        <h1 className="manaquiz-title">{appName} Test</h1>
+        <div className="manaquiz-header-left">
+          <button className="quiz-back-btn" onClick={onBackToApps}>
+            <i className="fas fa-arrow-left"></i>
+            Back
+          </button>
+          <h1 className="manaquiz-title">{appName} Test</h1>
+        </div>
         <div className="manaquiz-stats">
           <span className="stat-item">
             <i className="fas fa-list"></i> {currentQuestionIndex + 1} of {quizData.length}

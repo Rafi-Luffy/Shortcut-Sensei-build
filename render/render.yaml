@@ -7,7 +7,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: MONGODB_URI
+      - key: SUPABASE_CONNECTION_STRING
         sync: false # Set this manually in Render dashboard
       - key: JWT_SECRET
         generateValue: true # Render will generate a secure random value
@@ -15,6 +15,8 @@ services:
         sync: false # Set this manually
       - key: EMAIL_PASS
         sync: false # Set this manually
+      - key: FRONTEND_URL
+        sync: false # Set this to your frontend URL: https://your-frontend-service.onrender.com
     healthCheckPath: /health
     disk:
       name: uploads

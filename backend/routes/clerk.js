@@ -1,6 +1,8 @@
 const express = require('express');
+const { createSupabaseAdminClient } = require('../config/supabase');
 
 const router = express.Router();
+const supabase = createSupabaseAdminClient();
 
 let clerkSdk;
 try {
@@ -9,7 +11,18 @@ try {
   clerkSdk = null;
 }
 
-const User = require('../models/User');
+function mapPublicUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar,
+    totalPoints: user.total_points || 0,
+    streak: user.streak || { current: 0, longest: 0 },
+    badges: user.badges || [],
+    createdAt: user.created_at
+  };
+}
 
 router.post('/sync', async (req, res) => {
   if (!clerkSdk) {
@@ -53,58 +66,114 @@ router.post('/sync', async (req, res) => {
       )?.emailAddress;
       const email = primaryEmail || clerkUser.emailAddresses?.[0]?.emailAddress;
 
-      if (!email) {
-        return res.status(400).json({
-          success: false,
-          message: 'Clerk user has no email address; cannot sync to MongoDB.'
-        });
-      }
-
-      const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || clerkUser.username || email;
-
-      // Prefer matching by clerkUserId; fallback to email if the user already exists.
-      let user = await User.findOne({ clerkUserId });
-
-      if (!user) {
-        const existingByEmail = await User.findOne({ email });
-        if (existingByEmail) {
-          // Link existing MongoDB user to Clerk
-          existingByEmail.clerkUserId = clerkUserId;
-          existingByEmail.lastLogin = new Date();
-          existingByEmail.isEmailVerified = true;
-          // Preserve all existing MongoDB user data (avatar, name, etc.)
-          await existingByEmail.save();
-          user = existingByEmail;
+        if (!email) {
+          return res.status(400).json({
+            success: false,
+            message: 'Clerk user has no email address; cannot sync to Supabase.'
+          });
         }
-      }
 
-      if (!user) {
-        // Create new user with minimal Clerk data
-        user = await User.create({
-          authProvider: 'clerk',
-          clerkUserId,
-          email,
-          name,
-          isEmailVerified: true,
-          lastLogin: new Date()
-        });
-      } else {
-        // Only update login timestamp and verification status
-        // Preserve all existing MongoDB user data (avatar, profile, etc.)
-        user.lastLogin = new Date();
-        user.isEmailVerified = true;
-        await user.save();
-      }
+        const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || clerkUser.username || email;
+        const now = new Date().toISOString();
+
+        let user = null;
+
+        const { data: existingByClerkId, error: existingByClerkError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('clerk_user_id', clerkUserId)
+          .maybeSingle();
+
+        if (existingByClerkError) {
+          throw existingByClerkError;
+        }
+
+        user = existingByClerkId;
+
+        if (!user) {
+          const { data: existingByEmail, error: existingByEmailError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+
+          if (existingByEmailError) {
+            throw existingByEmailError;
+          }
+
+          if (existingByEmail) {
+            const { data: updatedUser, error: updateError } = await supabase
+              .from('users')
+              .update({
+                clerk_user_id: clerkUserId,
+                last_login: now,
+                is_email_verified: true,
+                auth_provider: 'clerk',
+                updated_at: now
+              })
+              .eq('id', existingByEmail.id)
+              .select('*')
+              .single();
+
+            if (updateError) {
+              throw updateError;
+            }
+
+            user = updatedUser;
+          }
+        }
+
+        if (!user) {
+          const { data: insertedUser, error: insertError } = await supabase
+            .from('users')
+            .insert({
+              auth_provider: 'clerk',
+              clerk_user_id: clerkUserId,
+              email,
+              name,
+              is_email_verified: true,
+              has_logged_in: true,
+              last_login: now,
+              created_at: now,
+              updated_at: now
+            })
+            .select('*')
+            .single();
+
+          if (insertError) {
+            throw insertError;
+          }
+
+          user = insertedUser;
+        } else {
+          const { data: updatedUser, error: updateError } = await supabase
+            .from('users')
+            .update({
+              last_login: now,
+              is_email_verified: true,
+              has_logged_in: true,
+              updated_at: now
+            })
+            .eq('id', user.id)
+            .select('*')
+            .single();
+
+          if (updateError) {
+            throw updateError;
+          }
+
+          user = updatedUser;
+        }
 
         return res.json({
           success: true,
-          user: user.getPublicProfile()
+          user: mapPublicUser(user)
         });
       } catch (error) {
         console.error('Clerk sync error:', error);
         return res.status(500).json({
           success: false,
-          message: 'Failed to sync Clerk user to MongoDB'
+          message: 'Failed to sync Clerk user to Supabase'
         });
       }
     });

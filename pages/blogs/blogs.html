@@ -53,10 +53,15 @@
         /* Core dark-mode overrides for this page (unified-system.js toggles the class) */
         body.dark-mode .featured-blog,
         body.dark-mode .blog-card,
-        body.dark-mode .footer-column,
         body.dark-mode .search-results {
             background-color: var(--dark-card);
             color: var(--dark-text);
+        }
+
+        body.dark-mode .footer-column {
+            background-color: transparent !important;
+            color: var(--dark-text) !important;
+            box-shadow: none !important;
         }
 
         body.dark-mode .blog-title,
@@ -947,10 +952,12 @@
         header .container {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            width: 90%;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
             margin: 0 auto;
-            gap: 0;
+            padding: 0 40px;
+            gap: 20px;
         }
         .logo a {
             color: #fff;
@@ -962,14 +969,21 @@
         .logo a:hover {
             color: #9c27b0;
         }
-        .logo { margin: 0; margin-right: 60px; flex-shrink: 0; }
-        .main-nav { margin: 0; margin-right: 30px; flex-shrink: 0; }
+        .logo { margin: 0; margin-right: 40px; flex-shrink: 0; }
+        .main-nav {
+            margin: 0;
+            margin-left: 80px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            max-width: 800px;
+        }
         .main-nav ul {
             list-style-type: none;
             margin: 0;
             padding: 0;
             display: flex;
-            gap: 15px;
+            gap: 25px;
             align-items: center;
         }
         .main-nav ul li {
@@ -999,12 +1013,13 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-left: 0;
+            margin-left: auto;
             flex-shrink: 0;
             min-width: 0;
         }
 
         .search-container {
+            order: 1;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -1086,6 +1101,7 @@
 
         /* Dark mode toggle - matching blogs-page-2 */
         .dark-mode-toggle {
+            order: 2;
             background: none;
             border: none;
             color: #fff;
@@ -1112,7 +1128,12 @@
 
         /* User menu */
         .user-menu-container {
+            order: 3;
             position: relative;
+        }
+
+        .login-button-container {
+            order: 3;
         }
 
         .user-avatar {
@@ -1232,7 +1253,7 @@
                 </button>
                 
                 <!-- User Menu -->
-                <div class="user-menu-container" id="userMenuContainer" style="display: none;">
+                <div class="user-menu-container" id="userMenuContainer">
                     <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()"></i>
                     <div class="user-dropdown" id="userDropdownMenu">
                         <a href="/quizs/?profile=true"><i class="fas fa-user"></i> User Profile</a>

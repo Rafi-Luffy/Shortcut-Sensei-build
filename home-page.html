@@ -71,7 +71,19 @@
             }
         ];
 
-        // Live timer functionality
+        // Shared clock formatter (single source of truth)
+        function formatLiveClock12Hour(now) {
+            const hours24 = now.getHours();
+            const ampm = hours24 >= 12 ? 'PM' : 'AM';
+            const displayHour = String((hours24 % 12) || 12).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+            return `${displayHour}:${minutes}:${seconds}.${milliseconds} ${ampm}`;
+        }
+
+        // Date panel functionality
         function updateDateTime() {
             const now = new Date();
             
@@ -86,25 +98,12 @@
             };
             const monthYear = now.toLocaleDateString('en-US', monthYearOptions);
             
-            // Time formatting with 12-hour format and milliseconds
-            let hours = now.getHours();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // 0 should be 12
-            const hoursStr = hours.toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
-            const formattedTime = `${hoursStr}:${minutes}:${seconds}.${milliseconds} ${ampm}`;
-            
             // Update displays
             const dayDisplay = document.getElementById('dayDisplay');
             const monthYearDisplay = document.getElementById('monthYearDisplay');
-            const liveClock = document.getElementById('liveClock');
             
             if (dayDisplay) dayDisplay.textContent = dayName;
             if (monthYearDisplay) monthYearDisplay.textContent = monthYear;
-            if (liveClock) liveClock.textContent = formattedTime;
         }
 
         // Get shortcut for today based on date
@@ -140,9 +139,9 @@
             // Initialize shortcut display
             updateShortcutDisplay(getTodayShortcut());
             
-            // Start live timer
+            // Date panel can update at a low frequency.
             updateDateTime();
-            setInterval(updateDateTime, 10); // Update every 10ms for smooth milliseconds
+            setInterval(updateDateTime, 1000);
         });
     </script>
     
@@ -1146,6 +1145,13 @@ header {
     font-family: 'Courier New', monospace;
     margin-bottom: 8px;
     letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    white-space: nowrap;
+    display: inline-block;
+    min-width: 15ch;
+    text-align: right;
+    line-height: 1.15;
 }
 
 .motivational-quote {
@@ -2760,6 +2766,392 @@ header {
     }
 }
 
+/* Final mobile recovery layer - keep desktop untouched */
+@media (max-width: 768px) {
+    .main-header {
+        padding: 10px 0 !important;
+    }
+
+    .main-header .container {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: 10px;
+        padding: 0 clamp(10px, 3.6vw, 16px) !important;
+        min-height: 56px;
+        flex-wrap: nowrap !important;
+    }
+
+    .header-left {
+        min-width: 0;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        justify-content: flex-start !important;
+    }
+
+    .logo {
+        margin-right: 0 !important;
+    }
+
+    .logo a {
+        display: block;
+        max-width: min(56vw, 230px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: clamp(1.06rem, 4.8vw, 1.36rem) !important;
+        line-height: 1.05;
+        padding: 0;
+    }
+
+    .header-right {
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-top: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px !important;
+    }
+
+    .menu-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        min-height: 46px;
+        margin: 0;
+        order: 3;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+        position: relative;
+        color: #fff;
+        font-size: 0;
+        line-height: 1;
+    }
+
+    .menu-toggle i {
+        display: none !important;
+    }
+
+    .menu-toggle::before {
+        content: '\2630';
+        font-size: 1.45rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .menu-toggle:hover,
+    .menu-toggle:focus-visible {
+        background: rgba(255, 255, 255, 0.22);
+        border-color: rgba(255, 255, 255, 0.5);
+        outline: none;
+    }
+
+    .menu-toggle.is-open::before {
+        content: '\2715';
+        font-size: 1.25rem;
+    }
+
+    .user-menu-container,
+    .login-button-container {
+        margin-left: 0 !important;
+    }
+
+    #headerAvatar {
+        font-size: 32px !important;
+        line-height: 1 !important;
+    }
+
+    .login-btn {
+        min-height: 40px;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+        gap: 6px;
+    }
+
+    .main-nav {
+        position: fixed !important;
+        top: 62px !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: calc(100dvh - 62px) !important;
+        margin: 0 !important;
+        max-width: none !important;
+        background: rgba(0, 0, 0, 0.97) !important;
+        overflow-y: auto;
+        z-index: 1200;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+    }
+
+    .main-nav.active,
+    .main-nav.show {
+        transform: translateX(0);
+    }
+
+    .main-nav ul,
+    .main-nav ul.show {
+        display: flex !important;
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+        padding: 14px 14px 24px !important;
+        position: static !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .main-nav ul li {
+        border-bottom: none !important;
+    }
+
+    .main-nav ul li a {
+        border-radius: 10px;
+        padding: 13px 14px;
+        text-align: left;
+        width: 100%;
+        font-weight: 600;
+    }
+
+    .main-nav ul li a:hover,
+    .main-nav ul li a:focus {
+        transform: none;
+        background-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .hero {
+        padding: clamp(18px, 4.4vh, 30px) 12px clamp(30px, 7vh, 44px) !important;
+        min-height: auto;
+    }
+
+    .hero .content {
+        width: min(100%, 560px);
+        margin-inline: auto;
+        padding: 0 6px;
+    }
+
+    .hero h1 {
+        font-size: clamp(1.6rem, 8.2vw, 2.1rem) !important;
+        line-height: 1.12;
+        margin: 0 0 10px;
+    }
+
+    .hero p {
+        font-size: clamp(0.92rem, 3.6vw, 1.03rem) !important;
+        line-height: 1.42;
+        margin: 0 auto 16px;
+        max-width: 34ch;
+    }
+
+    .get-started-style {
+        padding: 9px 16px !important;
+        font-size: 0.88rem !important;
+    }
+
+    .shortcut-of-day {
+        margin-top: -22px;
+        padding: 0 10px;
+        padding-bottom: 108px;
+    }
+
+    .shortcut-strip {
+        margin: 0;
+        padding: 15px;
+        gap: 16px;
+        border-radius: 14px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .date-section,
+    .shortcut-section,
+    .timer-section {
+        padding: 16px 14px !important;
+        border-bottom-color: #e6e7eb;
+    }
+
+    .timer-section {
+        border-bottom: none;
+    }
+
+    .shortcut-section .shortcut-description {
+        max-width: 100%;
+    }
+
+    footer {
+        padding: 34px 0 20px;
+    }
+
+    .footer-content {
+        gap: 20px;
+        padding: 0 14px;
+    }
+
+    .footer-column {
+        margin-bottom: 4px;
+    }
+
+    .footer-column h3 {
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+    }
+
+    .footer-links li {
+        margin-bottom: 7px;
+    }
+
+    .subscribe-form {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    .subscribe-form input[type="email"],
+    .subscribe-form button {
+        width: 100%;
+        border-radius: 14px;
+        min-height: 42px;
+    }
+
+    .floating-get-started {
+        left: auto;
+        right: max(10px, env(safe-area-inset-right));
+        transform: none;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        max-width: min(86vw, 170px);
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 0.79rem;
+        gap: 5px;
+        border-radius: 999px;
+        z-index: 950;
+        box-shadow: 0 6px 14px rgba(156, 39, 176, 0.32);
+    }
+
+    .floating-get-started:hover {
+        transform: translateY(-2px);
+    }
+
+    body.menu-open .floating-get-started {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header .container {
+        gap: 8px;
+        min-height: 54px;
+        padding: 0 10px !important;
+    }
+
+    .logo a {
+        max-width: min(54vw, 180px);
+        font-size: clamp(1rem, 5.2vw, 1.2rem) !important;
+    }
+
+    .menu-toggle {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    #headerAvatar {
+        font-size: 30px !important;
+    }
+
+    .hero {
+        padding-top: 16px !important;
+        padding-bottom: 30px !important;
+    }
+
+    .hero h1 {
+        font-size: clamp(1.45rem, 8.8vw, 1.8rem) !important;
+        margin-bottom: 8px;
+    }
+
+    .hero p {
+        font-size: 0.9rem !important;
+        margin-bottom: 14px;
+    }
+
+    .shortcut-of-day {
+        margin-top: -16px;
+        padding: 0 8px;
+        padding-bottom: 92px;
+    }
+
+    .shortcut-strip {
+        padding: 14px;
+        gap: 12px;
+        border-radius: 12px;
+    }
+
+    .date-section,
+    .shortcut-section,
+    .timer-section {
+        padding: 12px 10px !important;
+    }
+
+    .day-display {
+        font-size: 1.25em;
+    }
+
+    .live-clock {
+        min-width: 13.5ch;
+        font-size: 1.05em !important;
+        letter-spacing: 0.4px;
+    }
+
+    footer {
+        padding: 30px 0 18px;
+    }
+
+    .footer-content {
+        padding: 0 10px;
+        gap: 16px;
+    }
+
+    .social-icons {
+        gap: 10px;
+    }
+
+    .social-icons li a {
+        width: 36px;
+        height: 36px;
+    }
+
+    .floating-get-started {
+        max-width: min(88vw, 158px);
+        font-size: 0.75rem;
+        padding: 7px 10px;
+    }
+}
+
+@media (max-height: 620px) {
+    .hero {
+        padding-top: 14px !important;
+        padding-bottom: 22px !important;
+    }
+
+    .shortcut-of-day {
+        padding-bottom: 84px;
+    }
+
+    .floating-get-started {
+        bottom: max(8px, env(safe-area-inset-bottom));
+    }
+}
+
     </style>
 </head>
 <body>
@@ -2783,7 +3175,7 @@ header {
             </nav>
         </div>
 
-        <div class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+        <div class="menu-toggle" id="menuToggle" role="button" aria-label="Toggle menu" aria-expanded="false" tabindex="0">
             <i class="fa-solid fa-bars"></i>
         </div>
 
@@ -2812,6 +3204,7 @@ header {
         <h1>Welcome to Shortcut Sensei</h1>
         <p>Your ultimate guide to keyboard shortcuts and productivity tips.</p>
         <a href="/quizs/?community=true" class="get-started-style" id="heroGetStartedBtn">Join our Community</a>
+    </div>
 </section>
 
 <!-- Shortcut of the Day Section -->
@@ -3116,37 +3509,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // --- 1. LIVE CLOCK FUNCTIONALITY ---
 
-    const dateElement = document.getElementById('live-date');
-    const hoursElement = document.getElementById('time-hours');
-    const minutesElement = document.getElementById('time-minutes');
-    const secondsElement = document.getElementById('time-seconds');
-    const millisecondsElement = document.getElementById('time-milliseconds');
-
-    // Helper function to add a leading zero if number is less than 10
-    function padZero(num) {
-        return num < 10 ? '0' + num : num;
-    }
-
-    // Helper function to pad milliseconds to 3 digits
-    function padMilliseconds(num) {
-        if (num < 10) return '00' + num;
-        if (num < 100) return '0' + num;
-        return num;
-    }
-
     function updateLiveClock() {
         const now = new Date();
         const liveClock = document.getElementById('liveClock');
         
         if (liveClock) {
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const seconds = now.getSeconds();
-            const milliseconds = now.getMilliseconds();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const displayHours = hours % 12 || 12;
-            
-            const timeString = `${displayHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')} ${ampm}`;
+            const timeString = window.formatLiveClock12Hour
+                ? window.formatLiveClock12Hour(now)
+                : `${String((now.getHours() % 12) || 12).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}.${String(now.getMilliseconds()).padStart(3, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
             liveClock.textContent = timeString;
         }
     }
@@ -3176,15 +3546,36 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
 
-    // Update live clock every 10ms for milliseconds display
-    setInterval(updateLiveClock, 10);
+    // Smooth millisecond clock without excess reflow/jitter.
+    setInterval(updateLiveClock, 40);
     updateLiveClock();
 
     // Add menu toggle functionality
     const menuToggleBtn = document.querySelector('.menu-toggle');
     if (menuToggleBtn) {
         menuToggleBtn.addEventListener('click', function() {
-            document.querySelector('.main-nav ul').classList.toggle('show');
+            const nav = document.getElementById('mainNav');
+            const navList = document.querySelector('.main-nav ul');
+            const isNowOpen = nav ? !nav.classList.contains('active') : false;
+
+            if (nav) {
+                nav.classList.toggle('active', isNowOpen);
+            }
+
+            if (navList) {
+                navList.classList.toggle('show', isNowOpen);
+            }
+
+            menuToggleBtn.classList.toggle('is-open', isNowOpen);
+            menuToggleBtn.setAttribute('aria-expanded', isNowOpen ? 'true' : 'false');
+            document.body.classList.toggle('menu-open', isNowOpen);
+        });
+
+        menuToggleBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                menuToggleBtn.click();
+            }
         });
     }
 
@@ -3281,10 +3672,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu toggle functionality
     const menuToggle = document.getElementById('menuToggle');
     const mainNav = document.getElementById('mainNav');
-    
+
+    function closeMobileMenu() {
+        if (!menuToggle || !mainNav) return;
+        const navList = mainNav.querySelector('ul');
+
+        mainNav.classList.remove('active');
+        if (navList) navList.classList.remove('show');
+        menuToggle.classList.remove('is-open');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('menu-open');
+    }
+
     if (menuToggle && mainNav) {
-        menuToggle.addEventListener('click', function() {
-            mainNav.classList.toggle('active');
+        document.addEventListener('click', function(e) {
+            const clickedInsideMenu = mainNav.contains(e.target);
+            const clickedToggle = menuToggle.contains(e.target);
+
+            if (!clickedInsideMenu && !clickedToggle) {
+                closeMobileMenu();
+            }
+        });
+
+        mainNav.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', closeMobileMenu);
         });
     }
     

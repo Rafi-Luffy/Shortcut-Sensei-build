@@ -1,5 +1,5 @@
 // API-based Authentication for Shortcut Sensei
-// This file handles user authentication across all pages using the MongoDB API
+// This file handles user authentication across all pages using the Supabase Postgres API
 
 import { DataSyncService } from './data-sync.js';
 

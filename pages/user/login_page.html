@@ -430,6 +430,73 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .social-auth-block {
+            width: 100%;
+            margin: 10px 0 8px;
+        }
+
+        .social-auth-label {
+            display: block;
+            color: #666;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .social-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+        }
+
+        .social-btn {
+            border-radius: 14px;
+            border: 1px solid #ddd;
+            background: #fff;
+            color: #333;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 10px 8px;
+            letter-spacing: 0;
+            text-transform: none;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .social-btn i {
+            font-size: 14px;
+        }
+
+        .social-btn:hover {
+            border-color: #FF4B2B;
+            color: #FF416C;
+            background: #fff;
+            box-shadow: 0 0 12px rgba(255, 65, 108, 0.2);
+        }
+
+        .social-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .social-btn.linkedin i {
+            color: #0a66c2;
+        }
+
+        .social-btn.facebook i {
+            color: #1877f2;
+        }
+
+        .social-btn.google i {
+            color: #ea4335;
+        }
     </style>
 </head>
 <body>
@@ -441,6 +508,14 @@
             <form id="registrationForm">
                 <h1>Create Account</h1>
                 <span>Enter your details to register</span>
+                <div class="social-auth-block">
+                    <span class="social-auth-label">Continue with</span>
+                    <div class="social-buttons">
+                        <button type="button" class="social-btn google" id="signupGoogleBtn"><i class="fab fa-google"></i>Google</button>
+                        <button type="button" class="social-btn linkedin" id="signupLinkedInBtn"><i class="fab fa-linkedin-in"></i>LinkedIn</button>
+                        <button type="button" class="social-btn facebook" id="signupFacebookBtn"><i class="fab fa-facebook-f"></i>Facebook</button>
+                    </div>
+                </div>
                 <input type="text" id="signup_name" placeholder="Full Name" required />
                 <input type="email" id="signup_email" placeholder="Email" required />
                 <div class="password-wrapper">
@@ -454,6 +529,14 @@
         <div class="form-container sign-in-container">
             <form id="loginForm">
                 <h1>Sign in</h1>
+                <div class="social-auth-block">
+                    <span class="social-auth-label">Continue with</span>
+                    <div class="social-buttons">
+                        <button type="button" class="social-btn google" id="signinGoogleBtn"><i class="fab fa-google"></i>Google</button>
+                        <button type="button" class="social-btn linkedin" id="signinLinkedInBtn"><i class="fab fa-linkedin-in"></i>LinkedIn</button>
+                        <button type="button" class="social-btn facebook" id="signinFacebookBtn"><i class="fab fa-facebook-f"></i>Facebook</button>
+                    </div>
+                </div>
                 <input type="email" id="login_email" placeholder="Email" required />
                 <div class="password-wrapper">
                     <input type="password" id="login_password" placeholder="Password" required />
@@ -496,9 +579,163 @@
         <p>© 2025 Shortcut Sensei - All Rights Reserved</p>
     </footer>
 
-    <!-- MongoDB Authentication Script -->
-    <script src="../../assets/js/mongodb-auth.js"></script>
+    <!-- Supabase Postgres Authentication Script -->
+    <script src="../../assets/js/app-auth.js"></script>
     <script>
+        let socialAuthReady = false;
+        let appConfig = { clerkPublishableKey: '', apiBaseUrl: '' };
+
+        async function fetchAppConfig() {
+            try {
+                const response = await fetch('/app-config.json', { cache: 'no-store' });
+                if (!response.ok) {
+                    return appConfig;
+                }
+
+                const data = await response.json();
+                appConfig = {
+                    clerkPublishableKey: data.clerkPublishableKey || '',
+                    apiBaseUrl: data.apiBaseUrl || ''
+                };
+            } catch (error) {
+                console.warn('Could not fetch app config:', error.message);
+            }
+
+            return appConfig;
+        }
+
+        function getApiBaseUrl() {
+            if (appConfig.apiBaseUrl) {
+                return appConfig.apiBaseUrl.replace(/\/$/, '');
+            }
+
+            return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? 'http://localhost:5000/api'
+                : `${window.location.origin}/api`;
+        }
+
+        function setSocialButtonsDisabled(disabled) {
+            const ids = [
+                'signupGoogleBtn',
+                'signupLinkedInBtn',
+                'signupFacebookBtn',
+                'signinGoogleBtn',
+                'signinLinkedInBtn',
+                'signinFacebookBtn'
+            ];
+
+            ids.forEach((id) => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = disabled;
+                }
+            });
+        }
+
+        async function loadClerkJs(publishableKey) {
+            if (!publishableKey) {
+                throw new Error('Clerk publishable key is missing.');
+            }
+
+            if (!window.Clerk) {
+                await new Promise((resolve, reject) => {
+                    const existingScript = document.getElementById('clerk-js-sdk');
+                    if (existingScript) {
+                        existingScript.addEventListener('load', resolve);
+                        existingScript.addEventListener('error', reject);
+                        return;
+                    }
+
+                    const script = document.createElement('script');
+                    script.id = 'clerk-js-sdk';
+                    script.async = true;
+                    script.crossOrigin = 'anonymous';
+                    script.setAttribute('data-clerk-publishable-key', publishableKey);
+                    script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Failed to load Clerk SDK.'));
+                    document.head.appendChild(script);
+                });
+            }
+
+            await window.Clerk.load({ publishableKey });
+        }
+
+        async function syncClerkSessionToApp() {
+            if (!window.Clerk || !window.Clerk.session) {
+                return false;
+            }
+
+            const token = await window.Clerk.session.getToken();
+            if (!token) {
+                return false;
+            }
+
+            const response = await fetch(`${getApiBaseUrl()}/clerk/sync`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success || !data.user) {
+                throw new Error(data.message || 'Failed to sync Clerk session.');
+            }
+
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('token', token);
+            localStorage.setItem('current_user', JSON.stringify(data.user));
+            localStorage.setItem('userData', JSON.stringify(data.user));
+            localStorage.setItem('userEmail', data.user.email || '');
+            localStorage.setItem('userDisplayName', data.user.name || data.user.email || 'User');
+
+            return true;
+        }
+
+        async function startSocialAuth(strategy) {
+            if (!socialAuthReady || !window.Clerk) {
+                showMessage('Social login is not configured yet. Please refresh and try again.', 'error');
+                return;
+            }
+
+            try {
+                await window.Clerk.authenticateWithRedirect({
+                    strategy,
+                    redirectUrl: `${window.location.origin}/pages/user/login_page.html`,
+                    redirectUrlComplete: `${window.location.origin}/pages/user/login_page.html`
+                });
+            } catch (error) {
+                console.error('Social auth error:', error);
+                showMessage(error.message || 'Unable to start social login.', 'error');
+            }
+        }
+
+        async function initSocialAuth() {
+            setSocialButtonsDisabled(true);
+
+            try {
+                const { clerkPublishableKey } = await fetchAppConfig();
+                await loadClerkJs(clerkPublishableKey);
+
+                socialAuthReady = true;
+                setSocialButtonsDisabled(false);
+
+                const synced = await syncClerkSessionToApp();
+                if (synced) {
+                    showMessage('Social sign in successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '../../home-page.html';
+                    }, 800);
+                }
+            } catch (error) {
+                console.error('Social auth initialization error:', error);
+                setSocialButtonsDisabled(true);
+            }
+        }
+
         // UI Elements
         const signUpButton = document.getElementById('signUp');
         const signInButton = document.getElementById('signIn');
@@ -514,6 +751,14 @@
         const toggleLoginPassword = document.getElementById('toggleLoginPassword');
         const signupPasswordField = document.getElementById('signup_password');
         const loginPasswordField = document.getElementById('login_password');
+
+        // Social login buttons
+        const signupGoogleBtn = document.getElementById('signupGoogleBtn');
+        const signupLinkedInBtn = document.getElementById('signupLinkedInBtn');
+        const signupFacebookBtn = document.getElementById('signupFacebookBtn');
+        const signinGoogleBtn = document.getElementById('signinGoogleBtn');
+        const signinLinkedInBtn = document.getElementById('signinLinkedInBtn');
+        const signinFacebookBtn = document.getElementById('signinFacebookBtn');
 
         // Toggle signup password visibility
         toggleSignupPassword.addEventListener('click', () => {
@@ -539,6 +784,13 @@
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
         });
+
+        signupGoogleBtn.addEventListener('click', () => startSocialAuth('oauth_google'));
+        signupLinkedInBtn.addEventListener('click', () => startSocialAuth('oauth_linkedin_oidc'));
+        signupFacebookBtn.addEventListener('click', () => startSocialAuth('oauth_facebook'));
+        signinGoogleBtn.addEventListener('click', () => startSocialAuth('oauth_google'));
+        signinLinkedInBtn.addEventListener('click', () => startSocialAuth('oauth_linkedin_oidc'));
+        signinFacebookBtn.addEventListener('click', () => startSocialAuth('oauth_facebook'));
 
         // Message handling function
         function showMessage(message, type = 'success') {
@@ -624,7 +876,7 @@
             }
         });
 
-        // MongoDB Registration
+        // Supabase Postgres Registration
         document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -703,20 +955,9 @@
             e.preventDefault();
             
             const email = document.getElementById('reset_email').value.trim();
-            const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? 'http://localhost:5000/api'
-                : '/api';
             
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email })
-                });
-
-                const data = await response.json();
+                const data = await MongoAuth.forgotPassword(email);
                 
                 if (data.success) {
                     showMessage("Password reset link sent! Check your email.", "success");
@@ -731,7 +972,7 @@
             }
         });
 
-        // MongoDB Sign In
+        // Supabase Postgres Sign In
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -766,6 +1007,8 @@
         if (MongoAuth.isAuthenticated()) {
             window.location.href = '../../home-page.html';
         }
+
+        initSocialAuth();
 
         // Resend verification email function
         async function resendVerification(email) {

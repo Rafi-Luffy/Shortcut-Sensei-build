@@ -57,10 +57,10 @@ check_dependencies() {
 validate_env() {
     print_status "Validating environment configuration..."
 
-    if [ -z "$MONGODB_URI" ]; then
-        print_error "MONGODB_URI environment variable is not set."
-        print_status "Please set your MongoDB connection string:"
-        echo "export MONGODB_URI='your_mongodb_connection_string'"
+    if [ -z "$SUPABASE_CONNECTION_STRING" ]; then
+        print_error "SUPABASE_CONNECTION_STRING environment variable is not set."
+        print_status "Please set your Supabase Postgres connection string:"
+        echo "export SUPABASE_CONNECTION_STRING='your_supabase_postgres_connection_string'"
         exit 1
     fi
 
@@ -154,7 +154,7 @@ show_instructions() {
     echo "   - Start Command: (leave default)"
     echo
     echo "6. 🔐 Set environment variables in Render dashboard:"
-    echo "   - MONGODB_URI: $MONGODB_URI"
+    echo "   - SUPABASE_CONNECTION_STRING: $SUPABASE_CONNECTION_STRING"
     echo "   - JWT_SECRET: (generate a secure secret)"
     echo "   - EMAIL_USER: your-email@gmail.com"
     echo "   - EMAIL_PASS: your-gmail-app-password"

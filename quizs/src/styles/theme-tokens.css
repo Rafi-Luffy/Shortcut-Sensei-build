@@ -1,0 +1,57 @@
+/* Shared theme tokens aligned with homepage visual system */
+:root {
+  --primary-color: #06a3be;
+  --primary-hover: #048ea6;
+  --secondary-color: #8a2be2;
+  --secondary-hover: #7a1dc5;
+  --header-footer-bg: #000000;
+
+  --light-bg: #f4f4f4;
+  --light-card: #ffffff;
+  --light-text: #333333;
+
+  --dark-bg: #121212;
+  --dark-card: #1e1e1e;
+  --dark-text: #f4f4f4;
+
+  --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-dark: 0 6px 14px rgba(0, 0, 0, 0.35);
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+
+  --quiz-bg: var(--light-bg);
+  --quiz-surface: var(--light-card);
+  --quiz-surface-muted: #fafafa;
+  --quiz-border: rgba(0, 0, 0, 0.1);
+  --quiz-text: var(--light-text);
+  --quiz-text-muted: #6b7280;
+  --quiz-nav-bg: var(--header-footer-bg);
+  --quiz-nav-text: #ffffff;
+  --quiz-shadow: var(--shadow-light);
+  --quiz-shadow-strong: 0 16px 32px rgba(0, 0, 0, 0.12);
+
+  --quiz-btn-primary-bg: var(--primary-color);
+  --quiz-btn-primary-hover: var(--primary-hover);
+  --quiz-btn-secondary-bg: transparent;
+  --quiz-btn-secondary-border: var(--primary-color);
+  --quiz-btn-secondary-text: var(--primary-color);
+
+  --quiz-semantic-success: #10b981;
+  --quiz-semantic-warning: #f59e0b;
+  --quiz-semantic-danger: #ef4444;
+  --quiz-semantic-info: #3b82f6;
+}
+
+html.dark-mode,
+body.dark-mode {
+  --quiz-bg: var(--dark-bg);
+  --quiz-surface: var(--dark-card);
+  --quiz-surface-muted: #181818;
+  --quiz-border: rgba(244, 244, 244, 0.12);
+  --quiz-text: var(--dark-text);
+  --quiz-text-muted: #a1a1aa;
+  --quiz-nav-bg: #000000;
+  --quiz-nav-text: #f4f4f4;
+  --quiz-shadow: var(--shadow-dark);
+  --quiz-shadow-strong: 0 18px 34px rgba(0, 0, 0, 0.5);
+}

@@ -1,8 +1,8 @@
 /**
  * Database Initialization Script
- * Optimized for MongoDB Atlas 512MB Free Tier
+ * Optimized for Supabase Postgres Atlas 512MB Free Tier
  * 
- * Run this script once after connecting to MongoDB Atlas:
+ * Run this script once after connecting to Supabase Postgres Atlas:
  * node backend/scripts/init-database.js
  */
 
@@ -13,14 +13,14 @@ const initializeDatabase = async () => {
   try {
     console.log('🚀 Starting database initialization...\n');
 
-    // Connect to MongoDB
-    const mongoURI = process.env.MONGODB_URI;
+    // Connect to Supabase Postgres
+    const mongoURI = process.env.SUPABASE_CONNECTION_STRING;
     await mongoose.connect(mongoURI, {
       maxPoolSize: 10,
       minPoolSize: 2,
       serverSelectionTimeoutMS: 5000,
     });
-    console.log('✅ Connected to MongoDB Atlas\n');
+    console.log('✅ Connected to Supabase Postgres Atlas\n');
 
     // Get database reference
     const db = mongoose.connection.db;
@@ -116,7 +116,7 @@ const initializeDatabase = async () => {
     process.exit(1);
   } finally {
     await mongoose.connection.close();
-    console.log('🔌 Disconnected from MongoDB\n');
+    console.log('🔌 Disconnected from Supabase Postgres\n');
     process.exit(0);
   }
 };

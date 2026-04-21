@@ -197,10 +197,10 @@ function generateComments(posts, users) {
 // Main seeding function
 async function seedCommunityData() {
   try {
-    // Connect to MongoDB
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/shortcut-sensei';
+    // Connect to Supabase Postgres
+    const mongoURI = process.env.SUPABASE_CONNECTION_STRING || 'supabase://localhost:27017/shortcut-sensei';
     await mongoose.connect(mongoURI);
-    console.log('✅ Connected to MongoDB');
+    console.log('✅ Connected to Supabase Postgres');
 
     // Get all users
     const users = await User.find({}).select('_id name email avatar');

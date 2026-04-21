@@ -1,4 +1,4 @@
-// MongoDB-based Authentication Service
+// Supabase Postgres-based Authentication Service
 const API_BASE_URL = 'http://localhost:4000/api';
 
 class MongoAuthService {

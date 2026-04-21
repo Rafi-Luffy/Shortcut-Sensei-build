@@ -1,7 +1,7 @@
-// MongoDB Authentication for Shortcut Sensei
-// Authentication via the MongoDB-backed API
+// Authentication helper for Shortcut Sensei
+// Uses backend routes that are now Clerk-backed.
 
-console.log('MongoDB authentication script loading...');
+console.log('Supabase Postgres authentication script loading...');
 
 // Configuration
 const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -51,6 +51,7 @@ async function register(email, password, displayName) {
     if (data.token) {
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('current_user', JSON.stringify(data.user));
+      localStorage.setItem('userData', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', data.user.email);
       localStorage.setItem('userDisplayName', data.user.name);
@@ -101,6 +102,7 @@ async function login(email, password) {
     // Store token and user data
     localStorage.setItem('auth_token', data.token);
     localStorage.setItem('current_user', JSON.stringify(data.user));
+    localStorage.setItem('userData', JSON.stringify(data.user));
     localStorage.setItem('token', data.token);
     localStorage.setItem('userEmail', data.user.email);
     localStorage.setItem('userDisplayName', data.user.name);
@@ -119,6 +121,10 @@ async function login(email, password) {
 function logout() {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('current_user');
+  localStorage.removeItem('userData');
+  localStorage.removeItem('token');
+  localStorage.removeItem('userEmail');
+  localStorage.removeItem('userDisplayName');
   currentUser = null;
   
   // Redirect to login page or home
@@ -138,7 +144,7 @@ function getCurrentUser() {
     return currentUser;
   }
 
-  const userData = localStorage.getItem('userData');
+  const userData = localStorage.getItem('current_user') || localStorage.getItem('userData');
   if (userData) {
     try {
       currentUser = JSON.parse(userData);
@@ -173,7 +179,7 @@ function getAuthToken() {
  */
 async function forgotPassword(email) {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/forgot-password`, {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -199,7 +205,7 @@ async function forgotPassword(email) {
  */
 async function resetPassword(token, newPassword) {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/reset-password`, {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -547,7 +553,7 @@ document.addEventListener('click', function(event) {
  * Initialize authentication on page load
  */
 function initializeAuth() {
-  console.log('Initializing MongoDB authentication...');
+  console.log('Initializing Supabase Postgres authentication...');
   
   // Update UI based on auth state
   updateUIForAuthState();
@@ -570,7 +576,7 @@ function initializeAuth() {
     }
   }, 1000);
   
-  console.log('MongoDB authentication initialized');
+  console.log('Supabase Postgres authentication initialized');
   console.log('User authenticated:', isAuthenticated());
 }
 
@@ -652,4 +658,4 @@ document.addEventListener('click', function(event) {
   }
 });
 
-console.log('MongoDB authentication module loaded');
+console.log('Supabase Postgres authentication module loaded');

@@ -30,20 +30,21 @@
         });
 
         function checkAuthState() {
-            const currentUser = localStorage.getItem('currentUser');
-            const isAuthenticated = !!currentUser;
+            const currentUser = localStorage.getItem('currentUser') || localStorage.getItem('current_user');
+            const token = localStorage.getItem('token') || localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+            const isAuthenticated = !!(currentUser || token);
 
             const userMenuContainer = document.getElementById('userMenuContainer');
             const loginButtonContainer = document.getElementById('loginButtonContainer');
 
             if (isAuthenticated) {
                 if (userMenuContainer) {
-                    userMenuContainer.style.display = 'block';
+                    userMenuContainer.style.display = 'flex';
                     updateUserProfile();
                 }
                 if (loginButtonContainer) loginButtonContainer.style.display = 'none';
             } else {
-                if (userMenuContainer) userMenuContainer.style.display = 'none';
+                if (userMenuContainer) userMenuContainer.style.display = 'flex';
                 if (loginButtonContainer) loginButtonContainer.style.display = 'block';
             }
         }
@@ -112,10 +113,12 @@
     <style>
         /* Reset Styles - Fix white space issues */
         html, body { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            overflow-x: hidden; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            height: auto !important;
+            min-height: 100vh !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
         }
         
         /* Base styles with CSS variables for easier theming (matches application pages) */
@@ -138,7 +141,7 @@
         }
 
         /* Base Styles */
-        body { font-family: Arial, sans-serif; background-color: var(--light-bg); color: var(--light-text); line-height: 1.6; padding-top: 0; transition: background-color var(--transition-speed), color var(--transition-speed); }
+        body { font-family: Arial, sans-serif; background-color: var(--light-bg); color: var(--light-text); line-height: 1.6; padding-top: 0; transition: background-color var(--transition-speed), color var(--transition-speed); position: static !important; }
         .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
         
         /* Header styles - match Microsoft Excell application page */
@@ -156,8 +159,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            width: 90%;
-            margin: 0 auto;
+            width: 100% !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 0 40px !important;
+            gap: 20px !important;
         }
 
         body.dark-mode {
@@ -198,64 +204,7 @@
             border-top-color: #9c27b0;
         }
 
-        .logo a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.8em;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-
-        .main-nav ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            gap: 20px;
-        }
-
-        .main-nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            display: block;
-            transition: all var(--transition-speed) ease;
-            border-radius: var(--border-radius);
-        }
-
-        .main-nav ul li a:hover {
-            background-color: #444;
-        }
-
-        .main-nav ul li a.active {
-            background-color: var(--primary-color);
-        }
-
-        .get-started a {
-            background-color: #9c27b0;
-            border-radius: 20px !important;
-            padding: 8px 20px !important;
-            font-weight: bold;
-            transition: all 0.3s !important;
-        }
-
-        .get-started a:hover {
-            background-color: #7b1fa2 !important;
-            box-shadow: 0 4px 8px rgba(156, 39, 176, 0.3);
-        }
-
-        .search-container {
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            background-color: #fff;
-            border-radius: 25px;
-            padding: 5px 15px;
-            box-shadow: var(--shadow-light);
-            position: relative;
-            transition: all var(--transition-speed);
-        }
+        .logo { margin: 0; margin-right: 40px; flex-shrink: 0; }
 
         .dark-mode .search-container {
             background-color: #333;
@@ -304,17 +253,19 @@
         }
 
         .dark-mode-toggle {
-            background: none;
-            border: none;
-            color: #8B5FBF;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: none !important;
+            border: none !important;
+            color: #8B5FBF !important;
+            cursor: pointer !important;
+            padding: 10px !important;
+            border-radius: 50% !important;
+            transition: all 0.3s ease !important;
+            font-size: 1.2em !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            order: 2 !important;
+            margin-left: auto !important;
         }
 
         .dark-mode-toggle:hover {
@@ -329,8 +280,9 @@
 
         /* User Menu Styles */
         .user-menu-container {
-            position: relative;
-            margin-left: 15px;
+            position: relative !important;
+            margin-left: 15px !important;
+            order: 3 !important;
         }
 
         .user-avatar {
@@ -376,8 +328,10 @@
         }
 
         /* Login Button Styles */
-        .login-button-container {
-            position: relative;
+        .login-button-containe !important;
+            flex-shrink: 0 !important;
+            order: 3 !important;
+            margin-left: auto !importanttive;
             flex-shrink: 0;
         }
 
@@ -818,6 +772,60 @@
                 width: 100%;
             }
         }
+
+        /* Final header alignment override - match blogs/applications header behavior */
+        @media (min-width: 769px) {
+            header .container {
+                width: 100% !important;
+                max-width: 1400px !important;
+                margin: 0 auto !important;
+                padding: 0 40px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 20px !important;
+            }
+
+            .main-nav {
+                display: flex !important;
+                justify-content: center !important;
+                flex: 1 1 auto !important;
+            }
+
+            .main-nav ul {
+                gap: 25px !important;
+            }
+
+            .header-right {
+                margin-left: auto !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 14px !important;
+                flex-shrink: 0;
+            }
+
+            .header-right .search-container {
+                max-width: 360px !important;
+                min-width: 250px !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+
+            .header-right .search-container button {
+                position: static !important;
+                transform: none !important;
+                background: transparent !important;
+                color: #fff !important;
+                padding: 0 8px !important;
+            }
+
+            .user-menu-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 40px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -837,31 +845,34 @@
             </ul>
             <span class="menu-toggle"><i class="fas fa-bars"></i></span>
         </nav>
-        <div class="search-container">
-            <input type="text" placeholder="Search applications..." id="app">
-            <button type="button"><i class="fas fa-search"></i></button>
-            <div id="appResults" class="app-search-results"></div>
-        </div>
-        <div class="dark-mode-toggle" id="darkModeToggle">
-          <i class="fa-solid fa-moon"></i>
-          <i class="fa-solid fa-sun" style="display: none;"></i>
-        </div>
-        
-        <!-- User Menu -->
-        <div class="user-menu-container" id="userMenuContainer" style="display: none;">
-            <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
-            <div class="user-dropdown" id="userDropdownMenu">
-                <a href="/quizs/?profile=true"><i class="fas fa-user"></i> My Profile</a>
-                <div class="dropdown-divider"></div>
-                <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <div class="header-right">
+            <div class="search-container">
+                <input type="text" placeholder="Search applications..." id="app">
+                <button type="button"><i class="fas fa-search"></i></button>
+                <div id="appResults" class="app-search-results"></div>
             </div>
-        </div>
 
-        <!-- Login Button -->
-        <div class="login-button-container" id="loginButtonContainer">
-            <button class="login-btn" onclick="window.location.href='pages/user/login_page.html'">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
+            <div class="dark-mode-toggle" id="darkModeToggle">
+              <i class="fa-solid fa-moon"></i>
+              <i class="fa-solid fa-sun" style="display: none;"></i>
+            </div>
+            
+            <!-- User Menu -->
+            <div class="user-menu-container" id="userMenuContainer">
+                <i class="fas fa-user-circle user-avatar" id="headerAvatar" onclick="toggleUserMenu()" style="font-size: 36px; color: #8B5FBF; cursor: pointer; display: inline-block; line-height: 1;"></i>
+                <div class="user-dropdown" id="userDropdownMenu">
+                    <a href="/quizs/?profile=true"><i class="fas fa-user"></i> My Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+
+            <!-- Login Button -->
+            <div class="login-button-container" id="loginButtonContainer">
+                <button class="login-btn" onclick="window.location.href='pages/user/login_page.html'">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </div>
         </div>
     </div>
 </header>

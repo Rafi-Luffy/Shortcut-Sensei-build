@@ -17,6 +17,26 @@ try {
 
 const app = express();
 
+// Expose browser-safe config for static pages.
+app.get('/app-config.json', (req, res) => {
+  const clerkPublishableKey =
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+    process.env.CLERK_PUBLISHABLE_KEY ||
+    process.env.VITE_CLERK_PUBLISHABLE_KEY ||
+    '';
+
+  const apiBaseUrl =
+    process.env.API_BASE_URL ||
+    process.env.VITE_API_BASE_URL ||
+    '';
+
+  res.set('Cache-Control', 'no-store');
+  return res.json({
+    clerkPublishableKey,
+    apiBaseUrl
+  });
+});
+
 // Clerk (Vite) auth app (served from built assets)
 const clerkBuildPath = path.join(__dirname, 'clerk-auth', 'dist');
 const clerkIndexPath = path.join(clerkBuildPath, 'index.html');

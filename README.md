@@ -47,8 +47,8 @@ Comprehensive coverage including:
 
 ### Backend
 - Node.js with Express.js
-- MongoDB with Mongoose ODM
-- JWT for authentication
+- Supabase (PostgreSQL) for persistent data storage
+- Clerk for user authentication
 - RESTful API architecture
 
 ### Development Tools
@@ -62,7 +62,7 @@ Comprehensive coverage including:
 
 - Node.js (v14 or higher)
 - npm (v6 or higher)
-- MongoDB account (Atlas recommended)
+- Supabase Postgres account (Atlas recommended)
 
 ### Installation
 
@@ -89,11 +89,39 @@ cd ..
 
 Create `.env` file in backend directory:
 ```env
-MONGODB_URI=your_mongodb_connection_string
+SUPABASE_CONNECTION_STRING=your_supabase_postgres_connection_string
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_SECRET_KEY=your_supabase_service_role_or_secret_key
+CLERK_SECRET_KEY=your_clerk_secret_key
 PORT=5000
 NODE_ENV=development
 JWT_SECRET=your_jwt_secret_key
 ```
+
+### Supabase Schema Setup
+
+1. Add these env vars in backend `.env`:
+
+```env
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_SECRET_KEY=your_supabase_service_role_or_secret_key
+SUPABASE_CONNECTION_STRING=your_supabase_postgres_connection_string
+CLERK_SECRET_KEY=your_clerk_secret_key
+```
+
+2. Apply schema using script:
+
+```bash
+cd backend
+npm run setup:supabase
+```
+
+This creates the core tables:
+- users
+- questions
+- community_posts
+- community_stats
+- newsletter_subscriptions
 
 Create `.env` file in quizs directory:
 ```env

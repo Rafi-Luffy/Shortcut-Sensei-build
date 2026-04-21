@@ -2,7 +2,7 @@
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
-2. [MongoDB Atlas Setup](#mongodb-atlas-setup)
+2. [Supabase Postgres Atlas Setup](#supabase-atlas-setup)
 3. [Backend Deployment on Render](#backend-deployment-on-render)
 4. [Frontend Deployment on Render](#frontend-deployment-on-render)
 5. [Connecting Frontend to Backend](#connecting-frontend-to-backend)
@@ -17,16 +17,16 @@ Before starting, ensure you have:
 - ✅ A GitHub account
 - ✅ Your project pushed to a GitHub repository
 - ✅ A Render.com account (sign up at https://render.com)
-- ✅ A MongoDB Atlas account (sign up at https://mongodb.com/cloud/atlas)
+- ✅ A Supabase Postgres Atlas account (sign up at https://supabase.com/cloud/atlas)
 
 ---
 
-## MongoDB Atlas Setup
+## Supabase Postgres Atlas Setup
 
-### Step 1: Create MongoDB Cluster
+### Step 1: Create Supabase Postgres Cluster
 
-1. **Go to MongoDB Atlas**
-   - Visit https://www.mongodb.com/cloud/atlas
+1. **Go to Supabase Postgres Atlas**
+   - Visit https://www.supabase.com/cloud/atlas
    - Sign in or create a free account
 
 2. **Create a New Cluster**
@@ -68,7 +68,7 @@ Before starting, ensure you have:
    
    Example:
    ```
-   mongodb+srv://shortcutsensei:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   supabase+srv://shortcutsensei:<password>@cluster0.xxxxx.supabase.net/?retryWrites=true&w=majority
    ```
 
 2. **Modify Connection String**
@@ -77,7 +77,7 @@ Before starting, ensure you have:
    
    Final string should look like:
    ```
-   mongodb+srv://shortcutsensei:YourPassword123@cluster0.xxxxx.mongodb.net/shortcut_sensei?retryWrites=true&w=majority
+   supabase+srv://shortcutsensei:YourPassword123@cluster0.xxxxx.supabase.net/shortcut_sensei?retryWrites=true&w=majority
    ```
 
    ⚠️ **IMPORTANT:** Save this connection string - you'll need it for Render!
@@ -146,10 +146,10 @@ Before starting, ensure you have:
 
 Scroll down to "Environment Variables" section and add these:
 
-1. **MONGODB_URI**
-   - Key: `MONGODB_URI`
-   - Value: Your MongoDB connection string from earlier
-   - Example: `mongodb+srv://shortcutsensei:YourPassword123@cluster0.xxxxx.mongodb.net/shortcut_sensei?retryWrites=true&w=majority`
+1. **SUPABASE_CONNECTION_STRING**
+   - Key: `SUPABASE_CONNECTION_STRING`
+   - Value: Your Supabase Postgres connection string from earlier
+   - Example: `supabase+srv://shortcutsensei:YourPassword123@cluster0.xxxxx.supabase.net/shortcut_sensei?retryWrites=true&w=majority`
 
 2. **PORT**
    - Key: `PORT`
@@ -445,13 +445,13 @@ Expected response: `{"status":"ok"}` or similar
 3. Ensure frontend URL matches exactly (no trailing slash)
 4. Redeploy backend after CORS changes
 
-### Issue 3: MongoDB Connection Failed
+### Issue 3: Supabase Postgres Connection Failed
 
 **Symptoms:** Backend logs show "MongooseError" or connection failed
 
 **Solutions:**
-1. Verify `MONGODB_URI` environment variable is set correctly
-2. Check MongoDB Atlas network access allows all IPs (0.0.0.0/0)
+1. Verify `SUPABASE_CONNECTION_STRING` environment variable is set correctly
+2. Check Supabase Postgres Atlas network access allows all IPs (0.0.0.0/0)
 3. Ensure database user has correct permissions
 4. Test connection string locally first
 
@@ -579,7 +579,7 @@ If auto-deploy isn't working:
 
 Before going live:
 
-- [x] MongoDB cluster created and configured
+- [x] Supabase Postgres cluster created and configured
 - [x] Backend deployed to Render
 - [x] Frontend deployed to Render
 - [x] Environment variables set correctly
@@ -600,7 +600,7 @@ Before going live:
 ### Backend Environment Variables (Render)
 
 ```
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/shortcut_sensei?retryWrites=true&w=majority
+SUPABASE_CONNECTION_STRING=supabase+srv://username:password@cluster.supabase.net/shortcut_sensei?retryWrites=true&w=majority
 PORT=5000
 NODE_ENV=production
 JWT_SECRET=your-32-char-minimum-secret-key-here
@@ -651,7 +651,7 @@ git push origin main
 ## Support Resources
 
 - **Render Documentation:** https://render.com/docs
-- **MongoDB Atlas Docs:** https://docs.atlas.mongodb.com
+- **Supabase Postgres Atlas Docs:** https://docs.atlas.supabase.com
 - **Render Community:** https://community.render.com
 - **Check Service Status:** https://status.render.com
 
@@ -659,7 +659,7 @@ git push origin main
 
 ## Estimated Deployment Time
 
-- MongoDB Setup: 10 minutes
+- Supabase Postgres Setup: 10 minutes
 - Backend Deployment: 5-10 minutes
 - Frontend Deployment: 10-15 minutes
 - Testing & Configuration: 10 minutes
@@ -671,7 +671,7 @@ git push origin main
 ## Cost Breakdown
 
 **Free Tier:**
-- ✅ MongoDB Atlas M0: Free forever
+- ✅ Supabase Postgres Atlas M0: Free forever
 - ✅ Render Free Tier: 
   - Static Sites: Free forever
   - Web Services: 750 hours/month free (enough for 1 service)

@@ -25,6 +25,7 @@ async function initializeAPIAuth() {
         // Import the API authentication service
         const module = await import('./api-auth.js');
         const ServiceClass = module.APIAuthService;
+        window.APIAuthService = ServiceClass;
         apiAuthInstance = new ServiceClass();
 
         console.log('API authentication initialized successfully');
@@ -138,22 +139,23 @@ window.logout = async function() {
     console.log('Logging out user...');
 
     try {
-        const result = await APIAuthService.logout();
+        if (window.apiAuth && typeof window.apiAuth.logout === 'function') {
+            const result = await window.apiAuth.logout();
 
-        if (result.success) {
-            console.log('User logged out successfully');
+            if (result && result.success) {
+                console.log('User logged out successfully');
+                return;
+            }
 
-            // Clear localStorage
-            localStorage.removeItem('userPhotoURL');
-            localStorage.removeItem('userDisplayName');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userAvatarImage');
+            if (result && result.error) {
+                console.error('Error signing out:', result.error);
+                return;
+            }
 
-            // Redirect to login page
-            window.location.href = '../user/login_page.html';
-        } else {
-            console.error('Error signing out:', result.error);
+            return;
         }
+
+        console.warn('API auth is not initialized yet');
     } catch (error) {
         console.error('Error signing out:', error);
     }
@@ -177,6 +179,3 @@ document.addEventListener('click', function(event) {
         }
     }
 });
-
-// Export for use in other files
-window.APIAuthService = APIAuthService;

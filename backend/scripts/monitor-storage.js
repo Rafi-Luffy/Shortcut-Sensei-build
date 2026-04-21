@@ -1,6 +1,6 @@
 /**
  * Storage Monitoring Script
- * Monitor MongoDB Atlas storage usage for 512MB free tier
+ * Monitor Supabase Postgres Atlas storage usage for 512MB free tier
  * 
  * Run this script anytime to check storage usage:
  * node backend/scripts/monitor-storage.js
@@ -11,11 +11,11 @@ require('dotenv').config();
 
 const monitorStorage = async () => {
   try {
-    console.log('📊 MongoDB Atlas Storage Monitor\n');
+    console.log('📊 Supabase Postgres Atlas Storage Monitor\n');
     console.log('═'.repeat(60) + '\n');
 
-    // Connect to MongoDB
-    const mongoURI = process.env.MONGODB_URI;
+    // Connect to Supabase Postgres
+    const mongoURI = process.env.SUPABASE_CONNECTION_STRING;
     await mongoose.connect(mongoURI, {
       maxPoolSize: 5,
       serverSelectionTimeoutMS: 5000,
